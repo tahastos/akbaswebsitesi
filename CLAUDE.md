@@ -75,13 +75,19 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 - `index.html`: iskelet ve metinler (hero başlıkları `.caps`, adım noktaları `.dots`, sürükleme ipucu `.hhint`, süreç adımları `.ptrack`).
 - `css/style.css`: tüm stiller. Renkler `:root` değişkenlerinde.
   - **Görsel dil (24 Kasım 2026):** Kullanıcı Refero Styles'taki ORYZO AI stilini seçti (https://styles.refero.design/style/1f204e95-454a-437e-845b-c1b169d35607).
-  - Site her zaman koyu; ayrı bir açık mod yok. Zemin sıcak koyu (#100904), yazı krem (#ffedd7), yüzey Bark (#382416), çizgiler kesikli ince (#40372e, #6c5f51).
-  - Tek vurgu turuncu (#dc5000): yalnızca küçük etiketlerde, butonda asla kullanılmaz.
+  - **Renkler (25 Kasım 2026'da değişti):** ORYZO'nun koyu renkleri bırakıldı; kullanıcı arka planı fazla karanlık buldu. Yerine kurumsal renkler geldi. **Kural: arayüzde bu renkler dışında renk yok.** Türetilmiş ton, renk geçişi (gradient) ya da renkli gölge eklenmez; yalnızca aynı rengin saydamlığı (ızgara çizgileri, geçişteki kararma) kullanılabilir. Değişkenler `style.css` başında:
+    - Bordo `#5A0E27` (Pantone 7421 C): yazılar (krem zeminde), Ev kartı, Süreç kartı, çerçeve, WhatsApp butonu.
+    - Altın `#D39D3F` (Pantone 7563 C): küçük etiketler ("EV 01 / 07", adım numaraları), Tasarlayalım butonu, seçili Ev noktası, kesikli ayraçlar.
+    - Krem `#F4EDE1` (4. renk, Claude önerdi, kullanıcı kabul etti): Süreç Bölümü zemini, bordo/yeşil üstündeki yazılar, Ev noktaları şeridi.
+    - Yeşil `#1E3B2F`: Ev Bölümü zemini, üstünde soluk krem ızgara. Ev Bölümü'ndeki yazılar krem.
+    - Mavi `#75B7E5` (Pantone 2915 C): kurumsal renk ama şu an arayüzde kullanılmıyor. Kullanıcı bunu biliyor; bir yere koymayı önerebilirsin.
+  - Renk seçim süreci: dört palet denendi (bordo-adaçayı-krem; kırmızı-bej-yeşil; bordo-kum-krem-buz mavisi; bordo-mavi-altın + krem), dördüncüsü seçildi. Ev Bölümü zemini için mavi, altın ve kesim matı deseni (cetvel, açı çizgileri, şablonlar) denendi, hiçbiri beğenilmedi; tekrar önerme.
+  - 3B sahnelerin içi (evdeki eşyalar, Süreç stüdyo fonları, figürler, ölçü etiketleri) hâlâ eski renklerde. Kullanıcıya bunları da 4 renge çevirmek soruldu, henüz karar vermedi.
   - Yazı tipi Outfit. ORYZO'nun gövde yazısı ücretli Halyard Display (Adobe Fonts). Logosu ise font değil, özel çizilmiş bir SVG.
   - Yan yana karşılaştırmada Outfit en yakın ücretsiz font çıktı.
   - Ağırlıklar: logo 700, büyük harfli başlık ve etiketler 600, gövde 400. Gövde metni normal harfli ve sola yaslı.
   - Kullanıcının Adobe Creative Cloud aboneliği olursa gerçek Halyard kullanılabilir.
-  - Düzen oryzo.ai'den alındı: Ev Bölümü'nün zemini yeşil kesim matı (ızgaralı), ilk adımda dev logo, sağ üstte küçük menü, sol altta yarı saydam kart, altta "Kaydırarak devam edin", sağ kenarda krem dikey şerit içinde Ev noktaları. Süreç Bölümü koyu "void" zeminde.
+  - Düzen oryzo.ai'den alındı: Ev Bölümü'nün zemini ızgaralı, ilk adımda dev logo, sağ üstte küçük menü, sol altta kart, altta "Kaydırarak devam edin", sağ kenarda krem dikey şerit içinde Ev noktaları.
   - Köşe yuvarlaklıkları: kart 12px, çerçeveli buton 22.5px, dolu buton 36px. Gölge yok.
   - Canvas UI efektleri denendi, hiçbiri beğenilmedi ve silindi; tekrar önerme. React Bits'teki tasarımları ise beğeniyor.
   - "Tek Ev" fikri denendi (25 Kasım 2026), beğenilmedi ve silindi; tekrar önerme. Fikir şuydu: ORYZO'daki bardak altlığı gibi, bütün sayfa boyunca arkada sabit duran tek bir ev; ev Süreç adımlarıyla birlikte kurulup dönüyor, kartlar önünden kayıyor. Kullanıcı mevcut site yapısıyla (Ev Bölümü, sonra Süreç Bölümü) devam etmek istiyor.
