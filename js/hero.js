@@ -547,9 +547,9 @@ function resize(force) {
   cam.updateProjectionMatrix(); dirty = true;
 }
 function calc() {
-  // Ev adımları, Süreç Bölümü üstüne binmeden 0,4 ekran önce biter: ev Ev 7'de ~3 fare kaydırması bekler,
-  // sonra geçiş başlar (210svh bindirme + 40svh bekleme = 2,5). #hero yüksekliği CSS'te buna göre 910svh.
-  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.5);
+  // Ev adımları, Süreç Bölümü üstüne binmeden 0,25 ekran önce biter: ev Ev 7'de ~2 fare kaydırması bekler,
+  // sonra geçiş başlar (210svh bindirme + 25svh bekleme = 2,35). #hero yüksekliği CSS'te buna göre 895svh.
+  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.35);
   target = reduce ? LAST : clamp(-r.top / tot) * LAST; if (Math.abs(target - cur) > .0008) dirty = true;
 }
 addEventListener('scroll', calc, { passive: true });
