@@ -11,10 +11,12 @@ const { clamp, e3, ss, M, B, BX, Cy, Sp, sh, canvasTex, makeRnd, makeRenderer, p
 const reduce = prefersReducedMotion();
 const hero = document.getElementById('hero'), stage = hero.querySelector('.stage'), cv = document.getElementById('c'), hint = hero.querySelector('.hhint');
 const caps = [...hero.querySelectorAll('.caps>div')], dots = [...hero.querySelectorAll('.dots i')];
-const LAST = caps.length - 1;
+const LAST = caps.length - 1, stepNo = hero.querySelector('.hcard b');
 let shown = -1, dragged = false;
 const setIdx = i => {
   if (i === shown) return; shown = i;
+  stage.dataset.step = i;
+  if (stepNo) stepNo.textContent = String(i + 1).padStart(2, '0');
   caps.forEach((e, k) => e.classList.toggle('on', k === i));
   dots.forEach((e, k) => e.classList.toggle('on', k === i));
   if (hint) hint.classList.toggle('on', i === LAST && !dragged);
@@ -481,7 +483,7 @@ const labGroup = new THREE.Group(), labMats = []; labGroup.visible = false; scen
 function makeLabels() {
   const rr = (k, x, y, w, h, r) => { k.beginPath(); k.moveTo(x + r, y); k.arcTo(x + w, y, x + w, y + h, r); k.arcTo(x + w, y + h, x, y + h, r); k.arcTo(x, y + h, x, y, r); k.arcTo(x, y, x + w, y, r); k.closePath(); };
   [['Yatak Odası', '25,0 m²', 2.5, 2.5], ['Çalışma Odası', '12,9 m²', 6.7, 1.9], ['Salon', '48,8 m²', 11.7, 3.7], ['Banyo', '13,0 m²', 2.5, 6.3], ['Mutfak', '20,0 m²', 2.5, 9.6], ['Balkon', '4,8 m²', 13.2, 8.25], ['Antre', '', 5.8, 8.6]].forEach(r => {
-    const c = document.createElement('canvas'), k = c.getContext('2d'), f1 = '600 44px Manrope,system-ui,sans-serif', f2 = '500 32px Manrope,system-ui,sans-serif';
+    const c = document.createElement('canvas'), k = c.getContext('2d'), f1 = '600 44px Outfit,system-ui,sans-serif', f2 = '500 32px Outfit,system-ui,sans-serif';
     k.font = f1; const w1 = k.measureText(r[0]).width; k.font = f2; const w2 = r[1] ? k.measureText(r[1]).width : 0;
     const cw = Math.ceil(Math.max(w1, w2)) + 60, ch = r[1] ? 132 : 84; c.width = cw; c.height = ch;
     k.fillStyle = 'rgba(244,239,230,.95)'; rr(k, 2, 2, cw - 4, ch - 4, r[1] ? 30 : 40); k.fill();

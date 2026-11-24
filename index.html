@@ -7,7 +7,7 @@
 <meta name="description" content="Akbaş Design: İstanbul ve Bursa’da yüz yüze, Türkiye genelinde online iç mimarlık, dekorasyon ve ölçüye özel mobilya.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,10 +15,13 @@
 <section id="hero" aria-label="Açılış">
 <div class="stage">
 <canvas id="c" aria-hidden="true"></canvas>
-<h1 class="brand">AKBAŞ DESIGN<span>İç mimarlık ve dekorasyon, İstanbul ve Bursa</span></h1>
+<h1 class="brand"><span>İç mimarlık ve dekorasyon. İstanbul ve Bursa.</span>AKBAŞ DESIGN</h1>
+<nav class="menu" aria-label="Menü"><a href="#hero">Ev</a><a href="#surec">Süreç</a><a href="https://wa.me/905000000000">İletişim</a></nav>
+<div class="hcard" aria-hidden="true"><strong>Tasarlayan<br>Akbaş Design,<br>iç mimarlık stüdyosu.</strong><span>Ev <b>01</b> / 07</span><p>Kaydırdıkça boş bir ev adım adım döşeniyor.</p></div>
+<div class="hscroll" aria-hidden="true"><i></i>Kaydırarak devam edin</div>
 <div class="caps">
-<div class="on"><p>Boş bir ev.</p><em>Kaydırarak başlayın</em></div>
-<div><p>Önce plan ve ölçüler.</p><em>Her oda, nasıl yaşadığınıza göre</em></div>
+<div class="on"><p>Boş bir ev.</p></div>
+<div><p>Önce plan ve ölçüler. Her oda, nasıl yaşadığınıza göre.</p></div>
 <div><p>Mutfak ve yemek alanı.</p></div>
 <div><p>Ferah bir salon ve balkon.</p></div>
 <div><p>Huzurlu bir yatak odası.</p></div>
@@ -30,14 +33,16 @@
 </div>
 </section>
 <section id="surec" aria-labelledby="surec-h">
-<div class="phead"><h2 id="surec-h">Fikirden teslime altı adım</h2><p>Her projede aynı sırayla ilerliyoruz. Adımlar arasında geçmek için sahneyi sağa sürükleyin.</p></div>
-<div class="pstage" tabindex="0" role="group" aria-label="Çalışma süreci, altı adım. Ok tuşlarıyla gezebilirsiniz.">
+<div class="psticky">
+<h2 id="surec-h" class="phead"><span>Fikirden teslime,</span>altı adımda.</h2>
+<div class="pstrip"></div>
+<div class="pstage" tabindex="0" role="group" aria-label="Çalışma süreci, altı adım. Kaydırarak ya da ok tuşlarıyla gezebilirsiniz.">
 <canvas aria-hidden="true"></canvas>
-<div class="pinfo" aria-live="polite"><span class="pnum">01</span><h3>Ön Görüşme</h3><p></p></div>
-<div class="phint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>Sağa sürükleyin</div>
-<div class="pnav"><button class="pprev" aria-label="Önceki adım"><svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><button class="pnext" aria-label="Sonraki adım"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button></div>
+<div class="pinfo" aria-live="polite"><div class="pname"><i></i><div><span class="pnum">01</span><h3>Ön Görüşme</h3></div></div><p></p></div>
 </div>
-<ol class="ptrack">
+<div class="pscroll" aria-hidden="true"><i></i>Kaydırarak devam edin</div>
+</div>
+<ol class="ptrack" hidden>
 <li><button type="button"><svg viewBox="0 0 24 24"><path d="M4 5h11v8H9l-4 3v-3H4z"/><path d="M15 9h5v8h-1v3l-4-3h-3"/></svg><span>01</span><b>Ön Görüşme</b></button><p>İhtiyacınızı, bütçenizi ve tarzınızı dinliyoruz. Yüz yüze ya da online.</p></li>
 <li><button type="button"><svg viewBox="0 0 24 24"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2m1-5 2 2m1-5 2 2"/></svg><span>02</span><b>Keşif ve Röleve</b></button><p>Mekâna gelip her duvarı, prizi ve tesisatı milimetresine kadar ölçüyoruz.</p></li>
 <li><button type="button"><svg viewBox="0 0 24 24"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span>03</span><b>3D Tasarım</b></button><p>Ölçülere göre mekânınızı üç boyutlu tasarlıyor, render’larını hazırlıyoruz.</p></li>
