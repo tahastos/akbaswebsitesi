@@ -1,10 +1,13 @@
 /* Akbaş Design: hero 3D apartment.
    Scrolling furnishes a 2+1 flat room by room while the camera tours it; drag sideways to turn the house.
    Plan (metres, x → east, z → south/front):
-     Bedroom 0–5.0 × 0–5.0 | Study 5.0–8.4 × 0–3.8 | Living 8.4–15.0 × 0–7.4
+     The footprint is one rectangle, 0–15.0 × 0–11.6 (25 Kasım 2026: the living room was extended forward to fill the old L).
+     Bedroom 0–5.0 × 0–5.0 | Study 5.0–8.4 × 0–3.8 | Living 8.4–15.0 × 0–11.6 plus the reading nook 6.6–8.4 × 7.4–11.6
      Bath 0–5.0 × 5.0–7.6  | Corridor 5.0–6.6 × 3.8–11.6 (front door at z=11.6) + hall 6.6–8.4 × 3.8–7.4
-     Kitchen + dining 0–5.0 × 7.6–11.6 | Balcony 11.6–14.8 × 7.6–8.9, entered from the living room
+     Kitchen + dining 0–5.0 × 7.6–11.6 | Balcony (loggia inside the rectangle) 11.6–15.0 × 10.0–11.6, entered from the living room
    All door openings are 1.0 m wide.
+   Ev → Süreç transition: the camera turns to a straight top-down view, so the plan reads as a rectangle,
+   and the Süreç frame (process.js) is born on the plan's outline, then both shrink into the frame's place.
    Back walls (z=0, x=0) are full height with windows; all other walls are cut at LOW like an architectural section. */
 (function () {
 const { clamp, e3, ss, M, B, BX, Cy, Sp, sh, canvasTex, makeRnd, makeRenderer, prefersReducedMotion, isCoarsePointer } = AKBAS;
@@ -28,9 +31,9 @@ const coarse = isCoarsePointer();
 let pr = Math.min(devicePixelRatio || 1, coarse ? 1.5 : 2);
 R.setPixelRatio(pr);
 if (coarse) R.shadowMap.type = THREE.PCFShadowMap;
-const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(28, 1, .5, 200);
-const PI = Math.PI, W = 15.0, D = 11.6, HX = 6.6, E = 7.4, H = 2.8, LOW = 1.05, T = .2, t = .12;  // L-shaped footprint: west wing 0–HX × 0–D, east wing HX–W × 0–E
-const BW0 = 11.6, BW1 = 14.8, BZ = 8.9;  // balcony in front of the living room
+const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(28, 1, .5, 400);
+const PI = Math.PI, W = 15.0, D = 11.6, HX = 6.6, E = 7.4, H = 2.8, LOW = 1.05, T = .2, t = .12;  // rectangle W × D; HX = corridor's east side, E = hall's front
+const LW0 = 11.6, LZ0 = 10.0;  // balcony (loggia) in the front-right corner: LW0–W × LZ0–D
 const rnd = makeRnd(7);
 
 /* ---------- soft studio reflections (so brass, steel and marble read correctly) ---------- */
@@ -100,10 +103,9 @@ const marM = (rx, ry) => { const m = new THREE.MeshStandardMaterial({ map: rep(m
 const splM = (rx, ry) => { const tx = rep(marT, rx, ry); const m = new THREE.MeshStandardMaterial({ map: tx, roughness: .25, emissive: 0xffc890, emissiveMap: tx, emissiveIntensity: 0 }); m.envMapIntensity = .6; return m; };
 const splash = [];
 
-/* =================== SHELL: L-shaped slab, walls, windows, doors =================== */
+/* =================== SHELL: rectangular slab, walls, windows, doors =================== */
 const slabM = M(0xb8b2a8, .95);
-B(scene, HX + .5, .3, D + .5, .03, slabM, HX / 2, -.15, D / 2);
-B(scene, W - HX, .3, E + .5, .03, slabM, (W + HX + .5) / 2, -.15, E / 2);
+B(scene, W + .5, .3, D + .5, .03, slabM, W / 2, -.15, D / 2);
 const wallMat = M(0xc4c7cc, .95, 0, .5), capM = M(0x4a433c, .85, 0, .3), frameM = M(0xece6dc, .5);
 const winGlow = new THREE.MeshBasicMaterial({ color: 0xdfe9ff });
 
@@ -144,27 +146,27 @@ function wall(axis, c, a0, a1, h, th, ops = [], cast = true) {
 // full-height back walls with windows (bedroom, study, living ×2 | kitchen)
 wall('x', -T / 2, -T, W + T, H, T, [[1.0, 2.4, .85, 2.3], [6.2, 7.6, .9, 2.25], [8.75, 9.6, .85, 2.3], [13.85, 14.75, .85, 2.3]], false);
 wall('z', -T / 2, 0, D + T, H, T, [[10.4, 11.0, 1.55, 2.3]], false);
-// exterior walls on the camera side, cut low
-wall('x', D + T / 2, 0, HX + T, LOW, T, [[5.3, 6.3]]);   // front of the west wing, with the entrance
-wall('z', HX + T / 2, E + T, D, LOW, T);                  // side of the corridor
-wall('x', E + T / 2, HX, W + T, LOW, T, [[12.5, 13.5]]);  // front of the east wing, balcony door
-wall('z', W + T / 2, 0, E, LOW, T);
+// exterior walls on the camera side, cut low; the balcony corner gets a glass rail instead
+wall('x', D + T / 2, 0, LW0, LOW, T, [[5.3, 6.3]]);       // front, with the entrance
+wall('z', W + T / 2, 0, LZ0, LOW, T);                     // right side
 // interior partitions (every door opening is 1.0 m)
 wall('z', 5.0, 0, D, LOW, t, [[3.9, 4.9], [5.6, 6.6], [8.6, 9.6]]);   // bedroom, bath, kitchen | study, corridor
 wall('x', 5.0, 0, 5.0 - t / 2, LOW, t);                                // bedroom | bath
 wall('x', 7.6, 0, 5.0 - t / 2, LOW, t);                                // bath | kitchen
 wall('x', 3.8, 5.0 + t / 2, 8.4, LOW, t, [[7.0, 8.0]]);                // study | hall
 wall('z', 8.4, 0, E, LOW, t, [[5.0, 6.0]]);                            // study, hall | living
-// balcony: slab, low parapet with a glass rail
-B(scene, BW1 - BW0 + .2, .3, BZ - E + .1, .03, slabM, (BW0 + BW1) / 2, -.15, (E + BZ) / 2 + .05);
-wall('x', BZ + .05, BW0 - .1, BW1 + .1, .22, .1);
-wall('z', BW0 - .05, E + T, BZ, .22, .1); wall('z', BW1 + .05, E + T, BZ, .22, .1);
+wall('z', HX, E - t / 2, D, LOW, t);                                   // corridor | reading nook
+wall('x', E, HX, 8.4 + t / 2, LOW, t);                                 // hall | reading nook
+wall('x', LZ0, LW0, W + T, LOW, t, [[12.6, 13.6]]);                    // living | balcony, balcony door
+wall('z', LW0, LZ0, D + T, LOW, t);                                    // living | balcony
+// balcony: low parapet with a glass rail on the two outer sides
+wall('x', D + .05, LW0, W + .1, .22, .1); wall('z', W + .05, LZ0, D + .1, .22, .1);
 {
-  const railM = M(0x3a3632, .5, .6, 1);
-  BX(scene, BW1 - BW0 + .2, .72, .02, glassM, (BW0 + BW1) / 2, .6, BZ + .05, false);
-  [BW0 - .05, BW1 + .05].forEach(x => BX(scene, .02, .72, BZ - E - T, glassM, x, .6, (E + T + BZ) / 2, false));
-  BX(scene, BW1 - BW0 + .24, .04, .05, railM, (BW0 + BW1) / 2, .98, BZ + .05, false);
-  [BW0 - .05, BW1 + .05].forEach(x => BX(scene, .05, .04, BZ - E - T + .05, railM, x, .98, (E + T + BZ) / 2, false));
+  const railM = M(0x3a3632, .5, .6, 1), bw = W - LW0, bd = D - LZ0;
+  BX(scene, bw + .1, .72, .02, glassM, (LW0 + W) / 2, .6, D + .05, false);
+  BX(scene, .02, .72, bd + .1, glassM, W + .05, .6, (LZ0 + D) / 2, false);
+  BX(scene, bw + .14, .04, .05, railM, (LW0 + W) / 2, .98, D + .05, false);
+  BX(scene, .05, .04, bd + .14, railM, W + .05, .98, (LZ0 + D) / 2, false);
 }
 
 /* ---------- floors (fade in) ---------- */
@@ -174,18 +176,28 @@ const mkFloor = (tex, x0, x1, z0, z1, tile, rough) => {
   const m = new THREE.MeshStandardMaterial({ map: rep(tex, w / tile, d / tile), roughness: rough, transparent: true, opacity: 0 }); m.envMapIntensity = .5;
   const f = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m); f.rotation.x = -PI / 2; f.position.set((x0 + x1) / 2, .004, (z0 + z1) / 2); f.receiveShadow = true; scene.add(f); floors.push(m);
 };
-mkFloor(oakT, 8.4, W, 0, E, 4, .6);            // living oak
+mkFloor(oakT, 8.4, W, 0, LZ0, 4, .6);          // living oak
+mkFloor(oakT, 8.4, LW0, LZ0, D, 4, .6);        // living oak, front strip beside the balcony
+mkFloor(oakT, HX, 8.4, E, D, 4, .6);           // reading nook oak
 mkFloor(oakT, 0, 5.0, 0, 5.0, 4, .6);          // bedroom oak
 mkFloor(oakT, 5.0, 8.4, 0, 3.8, 4, .6);        // study oak
 mkFloor(floorT, 5.0, HX, 3.8, D, 2.4, .3);     // corridor marble
 mkFloor(floorT, HX, 8.4, 3.8, E, 2.4, .3);     // hall marble
 mkFloor(floorT, 0, 5.0, 5.0, 7.6, 1.6, .25);   // bath marble tiles
 mkFloor(stoneT, 0, 5.0, 7.6, D, 2.4, .55);     // kitchen stone
-mkFloor(stoneT, BW0, BW1, E + T, BZ, 1.6, .6);  // balcony stone
+mkFloor(stoneT, LW0, W, LZ0, D, 1.6, .6);      // balcony stone
 
 /* ---------- scroll registry ---------- */
 const items = [];
-const reg = (o, s, e, m = 'drop') => { o.userData.y = o.position.y; o.visible = false; if (o.parent !== scene) scene.add(o); items.push({ o, s, e, m }); return o; };
+/* FURNISH: the furniture below is still timed in the old room-tour units (kitchen 1.2–2.2, living 2.2–3.2, bedroom 3.2–4.2,
+   bath/study/hall 4.2–5.2). Since 25 Kasım 2026 all rooms are furnished in the single step Ev 3 (t 1.1–2.15): each room keeps
+   its own order, rooms start .09 apart so the house fills up all at once with a light ripple, not room by room. */
+const FURNISH = (s, e) => {
+  if (s < 1.15) return [s, e];
+  const i = clamp(Math.floor(s - 1.2), 0, 3), ws = 1.2 + i, at = x => 1.1 + i * .09 + (x - ws) * .8;
+  return [at(s), at(e)];
+};
+const reg = (o, s, e, m = 'drop') => { [s, e] = FURNISH(s, e); o.userData.y = o.position.y; o.visible = false; if (o.parent !== scene) scene.add(o); items.push({ o, s, e, m }); return o; };
 const G = (x, y, z, ry) => { const g = new THREE.Group(); g.position.set(x, y, z); if (ry) g.rotation.y = ry; scene.add(g); return g; };
 const onA = (x, y) => G(x, y, 0);                                      // back wall, front faces +z
 const onB = (z, y) => { const g = G(0, y, z); g.rotation.y = PI / 2; return g; }; // left wall, front faces +x (local x runs toward -z)
@@ -336,18 +348,27 @@ reg(g, 2.85, 3.05);
 g = G(LX + 2.45, 0, 2.2); Cy(g, .22, .22, .03, marM(.5, .5), 0, .52, 0, true, 24); Cy(g, .02, .02, .5, brass, 0, .26, 0, true, 8); Cy(g, .15, .15, .02, brass, 0, .01, 0, false, 18); Cy(g, .05, .04, .12, pot, 0, .6, 0, false, 12); reg(g, 2.75, 3.0);
 // floor lamp beside the sofa's far arm (kept clear of the living-room door)
 g = G(LX + 1.72, 0, 5.3); Cy(g, .18, .18, .03, brass, 0, .015, 0); Cy(g, .012, .012, 1.6, brass, 0, .8, 0, true, 8); Cy(g, .17, .22, .3, M(0xf3ebdd, .9), 0, 1.65, 0, false, 24); Sp(g, .05, bulbM, 0, 1.55, 0); reg(g, 2.7, 3.0);
-g = G(10.2, 0, E - .28, PI); B(g, 1.9, .62, .42, .01, oak, 0, .43, 0); [-.85, .85].forEach(x => BX(g, .04, .14, .36, dark, x, .07, 0)); [-.47, .47].forEach(x => Cy(g, .008, .008, .3, brass, x, .45, .22, false, 8));
+// low console against the front wall (the living room now runs all the way to it)
+g = G(9.95, 0, D - .28, PI); B(g, 1.9, .62, .42, .01, oak, 0, .43, 0); [-.85, .85].forEach(x => BX(g, .04, .14, .36, dark, x, .07, 0)); [-.47, .47].forEach(x => Cy(g, .008, .008, .3, brass, x, .45, .22, false, 8));
 Cy(g, .09, .06, .3, pot, -.55, .89, 0, true, 16); bush(g, -.55, 1.1, 0, 6, .08); B(g, .3, .05, .22, .008, sageD, .4, .765, 0); B(g, .26, .04, .2, .008, ivory, .42, .81, 0); reg(g, 2.7, 3.0);
 g = G(14.55, 0, 6.85); Cy(g, .24, .19, .5, pot, 0, .25, 0, true, 24); leaves(g, 0, .5, 0); reg(g, 2.8, 3.05);
 
-/* =================== BALCONY (x 11.6–14.8, z 7.6–8.9): tall storage cabinet, bistro table, planter =================== */
-g = G(BW0 + .4, 0, E + T);
-B(g, .64, 2.1, .48, .01, sageD, 0, 1.05, .24); [-.155, .155].forEach((x, i) => { door(g, .31, 2.04, x, 1.05, .48, sage); Cy(g, .008, .008, .3, brass, x + (i ? -.11 : .11), 1.05, .53, false, 8); });
-reg(g, 2.6, 2.9, 'grow');
-g = G(14.2, 0, 8.3); Cy(g, .3, .3, .03, marM(.6, .6), 0, .72, 0, true, 28); Cy(g, .02, .02, .7, dark, 0, .36, 0, true, 8); Cy(g, .18, .18, .02, dark, 0, .01, 0, false, 18);
+// reading nook by the hall (6.6–8.4 × 7.4–11.6): berjer facing the room, floor lamp, side table, low bookcase
+rug(7.5, 9.6, 1.6, 2.2, 0xcfc2ad, 2.6, 2.9);
+{ const c = berjer(0x76876c); c.position.set(7.3, 0, 10.2); c.rotation.y = PI / 2 + .35; scene.add(c); reg(c, 2.65, 2.95); }
+g = G(6.95, 0, 11.2); Cy(g, .15, .15, .03, brass, 0, .015, 0); Cy(g, .012, .012, 1.5, brass, 0, .75, 0, true, 8); Cy(g, .15, .2, .28, M(0xf3ebdd, .9), 0, 1.56, 0, false, 22); Sp(g, .05, bulbM, 0, 1.46, 0); reg(g, 2.75, 3.0);
+g = G(8.05, 0, 11.05); Cy(g, .2, .2, .03, marM(.4, .4), 0, .5, 0, true, 22); Cy(g, .02, .02, .48, brass, 0, .25, 0, true, 8); B(g, .18, .04, .13, .006, M(0x7e8e74, .7), 0, .53, 0); reg(g, 2.8, 3.02);
+g = G(HX + .2, 0, 8.6, PI / 2); B(g, 1.6, .78, .34, .01, oak, 0, .39, 0); [-.4, .4].forEach(x => BX(g, .02, .7, .3, oak, x, .39, .01));
+for (let k = 0; k < 9; k++) BX(g, .04, .2 + (k % 3) * .03, .22, M([0xe3d9ca, 0x76876c, 0x9b8676, 0x39414a, 0xcdb38a][k % 5], .8), -.7 + k * .055, .55 + (k % 3) * .015, .02, false);
+Cy(g, .07, .05, .2, pot, .5, .88, 0, false, 14); reg(g, 2.7, 3.0, 'grow');
+// big plant in the new front corner of the living room
+g = G(11.1, 0, 9.55); Cy(g, .26, .2, .5, terra, 0, .25, 0, true, 24); leaves(g, 0, .5, 0, 13, 1.1); reg(g, 2.8, 3.05);
+
+/* =================== BALCONY (loggia LW0–W × LZ0–D, inside the rectangle): bistro table, two chairs, planter =================== */
+g = G(14.25, 0, 10.85); Cy(g, .3, .3, .03, marM(.6, .6), 0, .72, 0, true, 28); Cy(g, .02, .02, .7, dark, 0, .36, 0, true, 8); Cy(g, .18, .18, .02, dark, 0, .01, 0, false, 18);
 Cy(g, .05, .04, .08, ivory, -.08, .775, .05, false, 12); Cy(g, .035, .03, .07, terra, .1, .77, -.06, false, 10); reg(g, 2.7, 2.95);
-[[13.68, 8.35, PI / 2], [14.2, 7.88, 0]].forEach((p, i) => { const c = tubChair(); c.position.set(p[0], 0, p[1]); c.rotation.y = p[2]; scene.add(c); reg(c, 2.75 + i * .04, 2.98); });
-g = G(13.0, 0, BZ - .2); B(g, 1.0, .32, .26, .02, terra, 0, .16, 0); bush(g, 0, .34, 0, 9, .1); reg(g, 2.8, 3.02);
+[[13.7, 10.85, PI / 2], [14.25, 10.35, 0]].forEach((p, i) => { const c = tubChair(); c.position.set(p[0], 0, p[1]); c.rotation.y = p[2]; scene.add(c); reg(c, 2.75 + i * .04, 2.98); });
+g = G(12.4, 0, D - .22); B(g, 1.2, .32, .26, .02, terra, 0, .16, 0); bush(g, 0, .34, 0, 10, .1); reg(g, 2.8, 3.02);
 
 /* =================== BEDROOM (x 0–5.0, z 0–5.0): 180×200 bed on the left wall =================== */
 const BZC = 2.5;  // bed centre line
@@ -471,18 +492,18 @@ floorGlow(2.4, .8, .98, 9.8, PI / 2); floorGlow(1.8, .8, 1.65, 8.4, 0, .45); flo
 floorGlow(.5, .5, .8, BZC - 1.32, PI / 2, .3); floorGlow(.5, .5, .8, BZC + 1.32, PI / 2, .3);
 
 /* ---------- lights ---------- */
-const CX = 7.4, CZ = 5.6;
+const CX = W / 2, CZ = D / 2;
 const hemi = new THREE.HemisphereLight(0xc3d0e2, 0x8a8176, .35); scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xdfe8ff, .9); sun.position.set(CX + 12, 17, CZ + 8); sun.target.position.set(CX, 0, CZ); sun.castShadow = true;
 sun.shadow.mapSize.set(coarse ? 1024 : 2048, coarse ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 50 }); sun.shadow.bias = -.0006; sun.shadow.normalBias = .02; scene.add(sun, sun.target);
-const warm = [[3.0, 2.3, 9.8, 1.3], [LX, 2.3, 3.7, 1.3], [2.5, 2.3, 2.5, 1.2], [6.2, 2.2, 5.2, 1.1], [2.5, 2.2, 6.3, .9]].map(p => { const l = new THREE.PointLight(0xffc98f, 0, 7, 2); l.position.set(p[0], p[1], p[2]); l.userData.k = p[3]; scene.add(l); return l; });
+const warm = [[3.0, 2.3, 9.8, 1.3], [LX, 2.3, 4.6, 1.4], [2.5, 2.3, 2.5, 1.2], [6.2, 2.2, 5.2, 1.1], [2.5, 2.2, 6.3, .9]].map(p => { const l = new THREE.PointLight(0xffc98f, 0, 7, 2); l.position.set(p[0], p[1], p[2]); l.userData.k = p[3]; scene.add(l); return l; });
 
 /* ---------- room labels shown on the plan step ---------- */
 const labGroup = new THREE.Group(), labMats = []; labGroup.visible = false; scene.add(labGroup);
 function makeLabels() {
   const rr = (k, x, y, w, h, r) => { k.beginPath(); k.moveTo(x + r, y); k.arcTo(x + w, y, x + w, y + h, r); k.arcTo(x + w, y + h, x, y + h, r); k.arcTo(x, y + h, x, y, r); k.arcTo(x, y, x + w, y, r); k.closePath(); };
-  [['Yatak Odası', '25,0 m²', 2.5, 2.5], ['Çalışma Odası', '12,9 m²', 6.7, 1.9], ['Salon', '48,8 m²', 11.7, 3.7], ['Banyo', '13,0 m²', 2.5, 6.3], ['Mutfak', '20,0 m²', 2.5, 9.6], ['Balkon', '4,8 m²', 13.2, 8.25], ['Antre', '', 5.8, 8.6]].forEach(r => {
+  [['Yatak Odası', '25,0 m²', 2.5, 2.5], ['Çalışma Odası', '12,9 m²', 6.7, 1.9], ['Salon', '78,7 m²', 11.4, 6.2], ['Banyo', '13,0 m²', 2.5, 6.3], ['Mutfak', '20,0 m²', 2.5, 9.6], ['Balkon', '5,4 m²', 13.3, 10.8], ['Antre', '', 5.8, 8.6]].forEach(r => {
     const c = document.createElement('canvas'), k = c.getContext('2d'), f1 = '600 44px Outfit,system-ui,sans-serif', f2 = '500 32px Outfit,system-ui,sans-serif';
     k.font = f1; const w1 = k.measureText(r[0]).width; k.font = f2; const w2 = r[1] ? k.measureText(r[1]).width : 0;
     const cw = Math.ceil(Math.max(w1, w2)) + 60, ch = r[1] ? 132 : 84; c.width = cw; c.height = ch;
@@ -495,30 +516,80 @@ function makeLabels() {
   });
 }
 
-/* ---------- camera tour: one key pose per caption (yaw/pitch in degrees, rx/ry = half extents to frame) ---------- */
+/* ---------- camera: one key pose per caption (yaw/pitch in degrees, rx/ry = half extents to frame) ----------
+   25 Kasım 2026: the room-by-room tour (7 steps) was too long for the user; now 4 steps and the camera stays on the whole house
+   while every room is furnished at once (see FURNISH below). */
 const KF = [
-  // genel bakışlar (Ev 1, 2, 7) 25 Kasım 2026'da ~%15 genişletildi: evin üst köşesi logonun altında kalıyordu
-  { c: [7.3, .4, 5.4], yaw: 45, pitch: 34, rx: 12.4, ry: 6.4 },  // empty flat
-  { c: [7.4, 0, 5.6], yaw: 38, pitch: 60, rx: 11.6, ry: 7.8 },   // plan + room names
-  { c: [2.4, 1.1, 9.5], yaw: 62, pitch: 36, rx: 4.1, ry: 3.1 },  // kitchen + dining
-  { c: [11.9, .6, 5.6], yaw: 30, pitch: 46, rx: 5.2, ry: 4.6 },  // living room + balcony
-  { c: [2.5, .9, 2.6], yaw: 24, pitch: 38, rx: 3.8, ry: 2.7 },   // bedroom
-  { c: [4.2, .5, 4.9], yaw: 40, pitch: 52, rx: 6.4, ry: 4.3 },   // bath, study, hall
-  { c: [7.3, .4, 5.4], yaw: 45, pitch: 36, rx: 12.4, ry: 6.4 }   // finished, evening
+  { c: [7.5, .4, 5.8], yaw: 45, pitch: 34, rx: 12.8, ry: 6.6 },  // Ev 1: empty flat
+  { c: [7.5, 0, 5.8], yaw: 38, pitch: 60, rx: 12.0, ry: 8.0 },   // Ev 2: plan + room names
+  { c: [7.5, .3, 5.8], yaw: 52, pitch: 40, rx: 12.2, ry: 6.6 },  // Ev 3: all rooms furnished together
+  { c: [7.5, .4, 5.8], yaw: 45, pitch: 36, rx: 12.8, ry: 6.6 }   // Ev 4: finished, evening
 ];
-const DEG = PI / 180, tgt = new THREE.Vector3(), tanV = Math.tan(cam.fov * DEG / 2);
+const DEG = PI / 180, tgt = new THREE.Vector3(), tgtB = new THREE.Vector3(W / 2, 0, D / 2), tanV = Math.tan(cam.fov * DEG / 2);
 let aspect = 1;
-function placeCamera(t, yawOff) {
+/* Ev → Süreç transition progress, the same value process.js uses (0 = house, 1 = Süreç frame ready). */
+const surec = document.getElementById('surec');
+// fallback only: process.js normally publishes a smoothed value in AKBAS.kT
+const transK = () => surec ? clamp(-surec.getBoundingClientRect().top / (stage.offsetHeight * 2.4)) : 0;
+// Outline of the house seen from above: slab corners, tops of the tall back walls, top of the low front corner.
+// The tall walls sit closer to the camera, so the plan is fitted by projecting these points, not by its size on paper.
+const PLAN_PTS = [[-.25, 0, -.25], [W + .25, 0, -.25], [-.25, 0, D + .25], [W + .25, 0, D + .25], [-T, H, -T], [W + T, H, -T], [-T, H, D + T], [W + T, LOW, D + T]].map(p => new THREE.Vector3(p[0], p[1], p[2]));
+const pv = new THREE.Vector3();
+// The top-down view uses a narrow lens from far away (dolly zoom), so it reads like a flat plan drawing:
+// wall tops line up with the footprint and the frame can hug the house with no green strip at any edge.
+const FOV = 28, FOV_TOP = 8;
+function setPose(tg, yawD, pitchD, dist, ox, oy, fov = FOV) {
+  const yaw = yawD * DEG, pitch = pitchD * DEG;
+  cam.position.set(tg.x + Math.sin(yaw) * Math.cos(pitch) * dist, tg.y + Math.sin(pitch) * dist, tg.z + Math.cos(yaw) * Math.cos(pitch) * dist);
+  cam.fov = fov; cam.lookAt(tg); cam.setViewOffset(cw, ch, ox, oy, cw, ch); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
+}
+function planBox() {
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (const p of PLAN_PTS) { pv.copy(p).project(cam); const x = (pv.x + 1) / 2 * cw, y = (1 - pv.y) / 2 * ch; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  return { x0, x1, y0, y1 };
+}
+// Top-down pose (yaw 90 → the long side of the plan stands vertical, like the 3:4 Süreç frame) whose outline fills the frame rectangle.
+// It also publishes the outline's width/height ratio (AKBAS.planAspect) so process.js can give the newborn frame exactly that shape:
+// the dashed line then sits on the house's outer edge with no strip of the green Ev background showing between them.
+function fitTop(fr, fov) {
+  const tanT = Math.tan(fov * DEG / 2);
+  let dist = ch / (2 * tanT * Math.min(fr.h / (W + .5), fr.w / (D + .5))), ox = cw / 2 - fr.cx, oy = ch / 2 - fr.cy;
+  for (let n = 0; n < 3; n++) {
+    setPose(tgtB, 90, 89.6, dist, ox, oy, fov);
+    const b = planBox(), bw = b.x1 - b.x0, bh = b.y1 - b.y0, sf = Math.min(fr.w / bw, fr.h / bh);
+    AKBAS.planAspect = bw / bh;
+    if (n < 2) { dist /= sf; continue; }
+    ox += (b.x0 + b.x1) / 2 - fr.cx; oy += (b.y0 + b.y1) / 2 - fr.cy;
+  }
+  return { dist, ox, oy };
+}
+function placeCamera(t, yawOff, kT) {
   const i = Math.min(KF.length - 2, Math.max(0, Math.floor(t))), f = ss(t - i, 0, 1), a = KF[i], b = KF[i + 1], L = (p, q) => p + (q - p) * f;
   tgt.set(L(a.c[0], b.c[0]), L(a.c[1], b.c[1]), L(a.c[2], b.c[2]));
   const portrait = aspect < 1;
-  const yaw = clamp(L(a.yaw, b.yaw) + yawOff, 4, 86) * DEG;
-  const pitch = Math.min(70, L(a.pitch, b.pitch) + (portrait ? 14 * (1 - aspect) : 0)) * DEG;
+  let yaw = clamp(L(a.yaw, b.yaw) + yawOff, 4, 86);
+  let pitch = Math.min(70, L(a.pitch, b.pitch) + (portrait ? 14 * (1 - aspect) : 0));
   const rx = Math.exp(L(Math.log(a.rx), Math.log(b.rx))), ry = Math.exp(L(Math.log(a.ry), Math.log(b.ry)));
   // phones: frame a little tighter sideways (the tall screen has spare room above and below)
-  const dist = Math.max(ry / tanV, rx * (portrait ? .84 : 1) / (tanV * aspect));
-  cam.position.set(tgt.x + Math.sin(yaw) * Math.cos(pitch) * dist, tgt.y + Math.sin(pitch) * dist, tgt.z + Math.cos(yaw) * Math.cos(pitch) * dist);
-  cam.lookAt(tgt);
+  let dist = Math.max(ry / tanV, rx * (portrait ? .84 : 1) / (tanV * aspect));
+  // dikey ekranda model yazıların üstüne kalkar; geniş ekranda hafifçe aşağı iner ki üst köşe dev logonun altında kalmasın
+  let ox = 0, oy = ch * (portrait ? .08 : -.04);
+  // Transition: swing to the top-down pose that fits the plan's outline exactly inside the frame rectangle
+  // process.js publishes (AKBAS.frame), so the dashed frame is drawn on the plan's edge and shrinks together with it.
+  // In order, so it reads as one calm move: first the house turns and rises to a top-down view (k 0–.26),
+  // then, overlapping the end of that, the lens narrows so the plan flattens into a clean rectangle (k .14–.32).
+  const fr = AKBAS.frame;
+  let fov = FOV;
+  if (kT > 0 && fr && fr.w > 0) {
+    const s1 = clamp(kT / .26), q = s1 * s1 * s1 * (s1 * (s1 * 6 - 15) + 10);   // smootherstep: soft start, soft finish
+    fov += (FOV_TOP - FOV) * ss(kT, .14, .32);
+    const B = fitTop(fr, fov);
+    yaw += (90 - yaw) * q; pitch += (89.6 - pitch) * q;
+    dist = Math.exp(Math.log(dist) + (Math.log(B.dist) - Math.log(dist)) * q);
+    tgt.lerp(tgtB, q);
+    ox += (B.ox - ox) * q; oy += (B.oy - oy) * q;
+  }
+  setPose(tgt, yaw, pitch, dist, ox, oy, fov);
 }
 
 /* ---------- state ---------- */
@@ -530,26 +601,27 @@ function update(t) {
     else { o.scale.setScalar(.9 + .1 * e); if (it.m === 'drop') o.position.y = o.userData.y + (1 - e) * 1.4; }
   }
   floors.forEach((m, i) => m.opacity = e3(clamp((t - .3 - i * .06) / .6)));
-  const lab = ss(t, .7, 1.05) * (1 - ss(t, 1.55, 1.95)); labGroup.visible = lab > .002; labMats.forEach(m => m.opacity = lab);
-  const w2 = e3(clamp((t - .4) / 1)), wk = ss(t, 5.15, 5.95);
+  const lab = ss(t, .7, 1.0) * (1 - ss(t, 1.1, 1.4)); labGroup.visible = lab > .002; labMats.forEach(m => m.opacity = lab);
+  const w2 = e3(clamp((t - .4) / 1)), wk = ss(t, 2.2, 2.95);   // evening light on the last step (Ev 4)
   wallMat.color.lerpColors(cC, cW, w2); hemi.color.lerpColors(hC, hW, wk); hemi.intensity = .35 - .1 * wk; sun.color.lerpColors(sC, sW, wk); sun.intensity = .9 - .3 * wk;
   ledM.emissiveIntensity = wk * 1.6; backM.emissiveIntensity = wk * .9; bulbM.emissiveIntensity = .05 + wk * 1.5; splash.forEach(m => m.emissiveIntensity = wk * .28);
   glowMats.forEach(m => m.opacity = wk * m.userData.k); winGlow.color.lerpColors(gC, gW, wk); warm.forEach(l => l.intensity = wk * l.userData.k);
-  placeCamera(t, yawOff + pxC * 6);
+  placeCamera(t, yawOff + pxC * 6, kT);
+  // during the transition the Ev overlays (caption, card, dots, scroll hint) step aside; logo and menu stay
+  stage.style.setProperty('--hk', ss(kT, 0, .2).toFixed(3));
+  if (hint && kT > .01) hint.classList.remove('on');
   setIdx(Math.min(LAST, Math.round(t)));
 }
-let cur = reduce ? LAST : 0, target = cur, dirty = true, visible = true, pxT = 0, pxC = 0, yawOff = 0, yawOffT = 0, lastT = performance.now(), slow = 0, cnt = 0, cw = 0, ch = 0;
+let cur = reduce ? LAST : 0, target = cur, kT = 0, houseHidden = false, dirty = true, visible = true, pxT = 0, pxC = 0, yawOff = 0, yawOffT = 0, lastT = performance.now(), slow = 0, cnt = 0, cw = 0, ch = 0;
 function resize(force) {
   const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h || (!force && w === cw && h === ch)) return; cw = w; ch = h;
   R.setSize(w, h, false); aspect = w / h; cam.aspect = aspect;
-  // dikey ekranda model yazıların üstüne kalkar; geniş ekranda hafifçe aşağı iner ki üst köşe dev logonun altında kalmasın
-  cam.setViewOffset(w, h, 0, h * (aspect < 1 ? .08 : -.04), w, h);
-  cam.updateProjectionMatrix(); dirty = true;
+  cam.updateProjectionMatrix(); dirty = true;   // view offset is set every frame in placeCamera
 }
 function calc() {
-  // Ev adımları, Süreç Bölümü üstüne binmeden 0,25 ekran önce biter: ev Ev 7'de ~2 fare kaydırması bekler,
-  // sonra geçiş başlar (210svh bindirme + 25svh bekleme = 2,35). #hero yüksekliği CSS'te buna göre 895svh.
-  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.35);
+  // Ev adımları (4 adım, 390svh) Süreç Bölümü üstüne binmeden 0,25 ekran önce biter: ev son adımda ~2 fare kaydırması bekler,
+  // sonra geçiş başlar (340svh bindirme + 25svh bekleme = 3,65). #hero yüksekliği CSS'te buna göre 755svh (= 390 + 365).
+  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 3.65);
   target = reduce ? LAST : clamp(-r.top / tot) * LAST; if (Math.abs(target - cur) > .0008) dirty = true;
 }
 addEventListener('scroll', calc, { passive: true });
@@ -585,7 +657,14 @@ function frame(now) {
   else if (d !== 0) { cur = target; dirty = true; }
   const dy = yawOffT - yawOff; if (Math.abs(dy) > .01) { yawOff += dy * Math.min(1, .16 * k); dirty = true; }
   const dp = pxT - pxC; if (Math.abs(dp) > .0005) { pxC += dp * .06; dirty = true; }
-  if (!dirty) return; dirty = false; update(cur); R.render(scene, cam);
+  // transition value comes already smoothed from process.js (AKBAS.kT), so the camera never jumps with the wheel
+  const kk = AKBAS.kT !== undefined ? AKBAS.kT : transK(); if (Math.abs(kk - kT) > .0002) { kT = kk; dirty = true; }
+  // once the blurred first Süreç scene fully covers the house (k > .56) the house canvas is hidden and not drawn at all;
+  // the frame then shrinks over the plain bordo Ev background
+  const hide = kT > .56;
+  if (hide !== houseHidden) { houseHidden = hide; cv.style.visibility = hide ? 'hidden' : ''; dirty = true; }
+  if (!dirty || houseHidden) return; dirty = false;
+  update(cur); R.render(scene, cam);
   if (++cnt > 12 && cnt < 70) { slow += dt; if (cnt === 69 && slow / 57 > 30 && pr > 1) { pr = 1; R.setPixelRatio(1); resize(true); } }
 }
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { makeLabels(); dirty = true; }); else makeLabels();

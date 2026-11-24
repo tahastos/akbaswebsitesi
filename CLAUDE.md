@@ -30,28 +30,32 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 **1. Ev Bölümü** (`#hero`, `js/hero.js`): sayfanın en başı, kaydırdıkça döşenen 3B daire.
 - **Logo:** sol üstteki "AKBAŞ DESIGN" yazısı ve üstündeki küçük satır (`.brand`). Ev 1'de dev, sonra küçülür.
 - **Menü:** sağ üstteki Ev / Süreç / İletişim bağlantıları (`.menu`). İletişim şimdilik WhatsApp'a gidiyor.
-- **Ev kartı:** sol alttaki yarı saydam kart, "Ev 01 / 07" sayacı içinde (`.hcard`).
+- **Ev kartı:** sol alttaki yarı saydam kart, "Ev 01 / 04" sayacı içinde (`.hcard`).
 - **Kaydırma ipucu:** alt ortadaki "Kaydırarak devam edin" (`.hscroll`).
 - **Ev modeli:** 3B daire (`canvas#c`).
 - **Ev yazıları:** alttaki değişen büyük cümleler (`.caps`).
-- **Ev noktaları:** sağdaki 7 nokta (`.dots`).
+- **Ev noktaları:** sağdaki 4 nokta (`.dots`).
 - **Çevirme ipucu:** "Evi çevirmek için sürükleyin" yazısı (`.hhint`).
-- **Ev adımları** (kaydırma sırası, `KF` dizisi): Ev 1 Boş ev, Ev 2 Plan, Ev 3 Mutfak, Ev 4 Salon ve balkon, Ev 5 Yatak odası, Ev 6 Banyo-çalışma-antre, Ev 7 Bitmiş ev.
+- **Ev adımları** (kaydırma sırası, `KF` dizisi, 25 Kasım 2026'dan beri 4 adım): Ev 1 Boş ev, Ev 2 Plan (oda adları), Ev 3 Bütün odalar birlikte döşeniyor, Ev 4 Bitmiş ev (akşam ışığı). Eskiden 7 adımdı ve kamera odaları tek tek geziyordu; kullanıcı "çok uzun, tek bir anda birden fazla odayı oluştur" dedi.
 - **Odalar:** Yatak odası, Çalışma odası, Salon, Balkon, Banyo, Mutfak, Antre (koridor) ve Hol (salon kapısının önü).
-- **Tasarlayalım butonu:** Ev 7'deki "Evinizi birlikte tasarlayalım" butonu (`.cta`).
+- **Tasarlayalım butonu:** Ev 4'teki "Evinizi birlikte tasarlayalım" butonu (`.cta`).
 
 **2. Süreç Bölümü** (`#surec`, `js/process.js`): oryzo.ai'deki "So portable, it's wearable" carousel'inden uyarlandı (24 Kasım 2026).
 - **Tek sahne (Ev → Süreç geçişi):** Kullanıcı sitenin ORYZO gibi tek sahne hissi vermesini istedi; bölümler arasında normal sayfa kayması görünmemeli.
-  - `#hero` 895svh; hero.js `tot`'u buna göre hesaplar (`stage.offsetHeight * 2.35` = 210svh bindirme + 25svh bekleme).
-  - Ev 7 tamamlandıktan sonra, Süreç geçişi başlamadan önce 25svh (~2 fare kaydırması) bekleme payı var. Geçmişi (25 Kasım 2026): eskiden bekleme yoktu ve tek kaydırmada Süreç'e iniliyordu; önce 40svh yapıldı, kullanıcı uzun buldu ve "çok da kısa olmasın" dedi, 25svh'ye indirildi. Değiştirmek için CSS'teki 895'i ve hero.js'teki 2,35'i birlikte değiştir (her 10svh = 0,1).
-  - Genel bakış kadrajları (Ev 1, 2, 7) aynı gün ~%15 genişletildi. Geniş ekranda model hafifçe aşağıda duruyor (`setViewOffset` −0,04); eskiden üst köşe dev logonun altında kalıyordu.
-  - `#surec` 510svh, `margin-top:-210svh` ve `z-index:3` ile evin üstüne biner.
-  - İlk 110svh geçiştir (`applyK`, k 0→1):
-    - kesikli çerçeve tam ekrandan çerçeve boyuna küçülür ve ev bu çerçevenin içinde bir fotoğrafa dönüşür;
-    - dışı kararır (çerçevenin `box-shadow`'u), sonra Süreç zemini gelir;
-    - çerçevenin içinde Ön Görüşme belirir;
-    - en son başlık, Adım şeridi ve Süreç kartı gelir.
-  - Geçişin ortasında kaydırma bırakılırsa yöne göre ilk adıma ya da Ev 7'ye oturur.
+  - `#hero` 755svh (390svh Ev adımları + 365); hero.js `tot`'u buna göre hesaplar (`stage.offsetHeight * 3.65` = 340svh bindirme + 25svh bekleme).
+  - Son Ev adımı (Ev 4) tamamlandıktan sonra, Süreç geçişi başlamadan önce 25svh (~2 fare kaydırması) bekleme payı var. Geçmişi (25 Kasım 2026): eskiden bekleme yoktu ve tek kaydırmada Süreç'e iniliyordu; önce 40svh yapıldı, kullanıcı uzun buldu ve "çok da kısa olmasın" dedi, 25svh'ye indirildi. Değiştirmek için CSS'teki 755'i ve hero.js'teki 3,65'i birlikte değiştir (her 10svh = 0,1).
+  - Genel bakış kadrajları aynı gün ~%15 genişletildi. Geniş ekranda model hafifçe aşağıda duruyor (`setViewOffset` −0,04); eskiden üst köşe dev logonun altında kalıyordu.
+  - `#surec` 640svh, `margin-top:-340svh` ve `z-index:3` ile evin üstüne biner.
+  - İlk 240svh geçiştir (`applyK`, k 0→1; `TR` = ekranın 2,4 katı, hero.js `transK` de 2,4 kullanır). 110svh ve 160svh denendi; kullanıcı ikisini de "sert, bir anda geçiyor" diye buldu (25 Kasım 2026). Değiştirmek için hepsini birlikte değiştir: process.js `TR`, hero.js `transK` çarpanı, `#surec` yüksekliği ve margin'i, `#hero` yüksekliği ve hero.js `tot` çarpanı.
+  - 25 Kasım 2026'dan beri çerçeve **evin planından doğuyor** (kullanıcının fikri):
+    - k 0–.26: hero.js evi yumuşakça döndürüp tam tepeye çıkarır (yaw 90, pitch 89,6; smootherstep). k .14–.32 arasında lens daralır ve kamera uzaklaşır (dolly zoom, `FOV` 28 → `FOV_TOP` 8); böylece tepeden görüntü düz bir plan çizimi gibi olur. Kullanıcı sırayı böyle istedi: "önce yumuşakça dönsün, yukarıdan dikdörtgen olsun, sonra kaysın". Plan, uzun kenarı dikey olarak ekranın ortasında büyük görünür; Ev yazısı, Ev kartı ve noktalar çekilir (`--hk`).
+    - k .26–.42: kesikli çerçeve evin dış hattına **tam yapışık** belirir (krem çizgi), dışı bordoya kararır. Kararma, Ev Bölümü zemininin üstüne bordo bir katmanla yapılır (`.stage` arka planında `--sk`); eskiden dev bir `box-shadow`'du ve her karede yeniden çizildiği için site kasıyordu. Çerçeve doğarken planın oranını alır (`--fsx/--fsy`), aradaki yeşil şerit bu yüzden görünmez. Kullanıcı yeşil şeridi istemedi.
+    - k .40–.52: çerçevenin içinde Ön Görüşme **bulanık** belirir ve evi örter. Kullanıcı: "küçülürken ev görünmesin". Boş krem kartla inmesi de denendi; kullanıcı "1. adımın net olmayan hâliyle insin" dedi.
+    - k .50–.84: çerçeve küçülür, 3:4 orana döner ve asıl yerine kayar; sahne .60–.92 arasında netleşir (`--bl` 16px → 0).
+    - k .84–1: krem Süreç zemini (çizgi bordoya döner), en son başlık, Adım şeridi ve Süreç kartı gelir.
+    - Akıcılık: process.js geçiş değerini kaydırmaya doğrudan bağlamaz. `kS`, her karede `kTarget`'ı (gerçek kaydırma) yumuşakça izler; böylece fare tekerleğinin adımları zıplama yapmaz. `kS` `AKBAS.kT` olarak yayınlanır ve hero.js kamerayı buna göre kurar. Ev, bulanık sahnenin altında kaldıktan sonra (k > .56) evin tuvali gizlenir ve hiç çizilmez. Çerçeve ölçüleri yalnızca ekran boyutu değişince okunur. Ölçüm (masaüstü, 25 Kasım 2026): ortalama kare 6 ms, en uzun 11 ms, takılan kare yok.
+    - Bağlantı: process.js her adımda çerçevenin dış dikdörtgenini `AKBAS.frame` olarak yayınlar (`cx, cy, w, h`, ekran pikseli). hero.js `fitTop()` evin üstten görünen hattını (taban köşeleri, duvar tepeleri) ekrana izdüşürüp kamerayı planı tam bu dikdörtgene oturtacak şekilde ayarlar ve hattın oranını `AKBAS.planAspect` olarak geri yayınlar.
+  - Geçişin ortasında kaydırma bırakılırsa yöne göre ilk adıma ya da Ev 4'e oturur. Bu otomatik kaydırmayı tarayıcının hızlı `smooth`'u değil, process.js `softScroll` yapar: smootherstep eğrisi, mesafeye göre 1,2–3,2 sn (tam geçiş ≈2,7 sn; 1,4 sn kullanıcıya hızlı geldi). Tekerlek, dokunma, tuş ya da tıklama gelirse hemen durur.
   - Menüdeki "Süreç" bağlantısı geçişi atlayıp ilk adıma gider.
 - Geçişten sonra sayfa kaydırıldıkça adımlar ilerler, sürükleme yok.
 - **Adım yakalama (snap):** Kullanıcı her adımın çerçevede tam ortalanmasını istedi.
@@ -77,7 +81,7 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
   - **Görsel dil (24 Kasım 2026):** Kullanıcı Refero Styles'taki ORYZO AI stilini seçti (https://styles.refero.design/style/1f204e95-454a-437e-845b-c1b169d35607).
   - **Renkler (25 Kasım 2026'da değişti):** ORYZO'nun koyu renkleri bırakıldı; kullanıcı arka planı fazla karanlık buldu. Yerine kurumsal renkler geldi. **Kural: arayüzde bu renkler dışında renk yok.** Türetilmiş ton, renk geçişi (gradient) ya da renkli gölge eklenmez; yalnızca aynı rengin saydamlığı (ızgara çizgileri, geçişteki kararma) kullanılabilir. Değişkenler `style.css` başında:
     - Bordo `#5A0E27` (Pantone 7421 C): yazılar (krem zeminde), Ev kartı, Süreç kartı, çerçeve, WhatsApp butonu.
-    - Altın `#D39D3F` (Pantone 7563 C): küçük etiketler ("EV 01 / 07", adım numaraları), Tasarlayalım butonu, seçili Ev noktası, kesikli ayraçlar.
+    - Altın `#D39D3F` (Pantone 7563 C): küçük etiketler ("EV 01 / 04", adım numaraları), Tasarlayalım butonu, seçili Ev noktası, kesikli ayraçlar.
     - Krem `#F4EDE1` (4. renk, Claude önerdi, kullanıcı kabul etti): Süreç Bölümü zemini, bordo/yeşil üstündeki yazılar, Ev noktaları şeridi.
     - Yeşil `#1E3B2F`: Ev Bölümü zemini, üstünde soluk krem ızgara. Ev Bölümü'ndeki yazılar krem.
     - Mavi `#75B7E5` (Pantone 2915 C): kurumsal renk ama şu an arayüzde kullanılmıyor. Kullanıcı bunu biliyor; bir yere koymayı önerebilirsin.
@@ -99,18 +103,18 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 
 ## Ev modeli (`js/hero.js`): mevcut durum
 
-- **L biçimli 2+1 daire**, ölçüler metre cinsinden. x doğuya, z öne doğru artıyor (24 Kasım 2026'da büyütüldü):
+- **Dikdörtgen 2+1 daire, 15,0 × 11,6 m** (25 Kasım 2026'ya kadar L biçimliydi). Ölçüler metre cinsinden; x doğuya, z öne doğru artıyor. Kullanıcı planın dikdörtgen olmasını istedi, çünkü Süreç çerçevesi bu dikdörtgenden doğuyor (aşağıda). Bunun için salon öne doğru uzatıldı (kamerada "sola"); ev küçültülmedi.
   - Yatak odası 0–5.0 × 0–5.0 (25 m²)
   - Çalışma odası 5.0–8.4 × 0–3.8 (12,9 m²)
-  - Salon 8.4–15.0 × 0–7.4 (48,8 m²)
+  - Salon 8.4–15.0 × 0–11.6 + okuma köşesi 6.6–8.4 × 7.4–11.6, balkon hariç (78,7 m²). Okuma köşesinde berjer, lambader, yan sehpa ve alçak kitaplık var; salonun ön duvarında konsol ve büyük bir bitki var.
   - Banyo 0–5.0 × 5.0–7.6 (13 m²)
   - Mutfak ve yemek alanı 0–5.0 × 7.6–11.6 (20 m²)
   - Koridor 5.0–6.6 × 3.8–11.6 (giriş kapısı z=11.6'da) ve hol 6.6–8.4 × 3.8–7.4
-  - Balkon 11.6–14.8 × 7.6–8.9 (4,8 m²), salondan kapıyla giriliyor (kapı x 12.5–13.5)
+  - Balkon dikdörtgenin içinde, sağ ön köşede: 11.6–15.0 × 10.0–11.6 (5,4 m²). Dış iki yüzü cam korkuluklu, salondan kapıyla giriliyor (kapı x 12.6–13.6). Sabitleri `LW0`, `LZ0`; banyodaki `BZ0` ile karıştırma.
 - **Bütün kapı boşlukları 1,0 m.**
 - Arkadaki iki dış duvar (z=0 ve x=0) tam boy ve pencereli. Diğer bütün duvarlar mimari kesit gibi `LOW` (1,05 m) yüksekliğinde kesik, üstlerinde koyu bir kapak var. Bu kararın sebebi: kamera odaların içine bakabilsin, site ağırlaşmasın.
-- Kaydırma 7 adım: boş ev → kuşbakışı plan (oda adları ve m² etiketleri) → mutfak ve yemek → salon → yatak odası → banyo, çalışma ve antre → akşam ışığında bitmiş ev ve WhatsApp butonu. Kamera pozları `KF` dizisinde (yaw ve pitch derece cinsinden, `rx`/`ry` kadraj yarı genişlikleri).
-- Eşyalar `reg(nesne, başlangıç, bitiş, mod)` ile kayıtlı, kaydırma değerine göre sahneye giriyor (`drop`, `grow`, `pop`).
+- Kaydırma 4 adım: boş ev → kuşbakışı plan (oda adları ve m² etiketleri) → bütün odalar birlikte döşeniyor → akşam ışığında bitmiş ev ve Tasarlayalım butonu. Kamera hep bütün evi gösteriyor; oda oda tur yok. Kamera pozları `KF` dizisinde (yaw ve pitch derece cinsinden, `rx`/`ry` kadraj yarı genişlikleri).
+- Eşyalar `reg(nesne, başlangıç, bitiş, mod)` ile kayıtlı, kaydırma değerine göre sahneye giriyor (`drop`, `grow`, `pop`). Kodda zamanlar hâlâ eski oda turu birimleriyle yazılı (mutfak 1.2–2.2, salon 2.2–3.2, yatak 3.2–4.2, banyo/çalışma/antre 4.2–5.2). `FURNISH()` bunları Ev 3'e (t 1.1–2.15) sıkıştırır: her oda kendi sırasını korur, odalar .09 arayla başlar. Böylece ev tek seferde, hafif bir dalgayla dolar. Yeni eşya eklerken o odanın eski aralığında bir zaman vermek yeterli.
 - Mobil: dikey ekranda kadraj ve açı otomatik ayarlanıyor. Kaydırma ilerlemesi sticky sahne yüksekliğine göre hesaplanıyor, adres çubuğu atlamalarından etkilenmiyor.
 
 ### Kullanıcının ev modeliyle ilgili istekleri (yapıldı)
@@ -154,7 +158,6 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 ## Açık işler ve notlar
 
 - WhatsApp numarası örnek numara (`905000000000`, `index.html` içinde iki yerde). Gerçek numara kullanıcıdan alınacak.
-- Kare ya da dikey ekranda Ev 4'te balkon, alttaki ev yazısının arkasında kalabiliyor; geniş ekranda sorun yok.
 - Sitede henüz menü, iletişim, footer, portfolyo ya da SEO için HTML içerik yok.
 - Depo herkese açık. Gizli bilgi (şifre, kişisel veri) ekleme.
 
