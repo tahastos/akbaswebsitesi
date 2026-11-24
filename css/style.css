@@ -3,7 +3,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg2);color:var(--ink);font:400 16px/1.45 var(--f)}
 a{color:inherit}
-#hero{height:760vh;height:760svh;position:relative}
+#hero{height:870vh;height:870svh;position:relative}
 
 /* Ev Bölümü: yeşil kesim matı zemin (ızgara + cetvel çizgileri) */
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;
@@ -66,23 +66,26 @@ a{color:inherit}
 .wa:focus-visible,.cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 /* Süreç Bölümü: ORYZO tarzı kaydırmalı carousel. Bölüm ekrana sabitlenir, kaydırdıkça adımlar ilerler. */
-#surec{position:relative;height:400vh;height:400svh;background:var(--bg2);border-top:1px dashed var(--line)}
-.psticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:radial-gradient(ellipse 60% 70% at 0% 100%,rgba(140,72,28,.55),transparent 70%),radial-gradient(ellipse 50% 60% at 100% 0%,rgba(56,36,22,.5),transparent 70%),var(--bg2)}
+/* Tek sahne: Süreç Bölümü, Ev Bölümü'nün son 210svh'sinin üstüne biner. İlk 110svh geçiştir: ev çerçevenin içinde "fotoğrafa" dönüşür. */
+#surec{position:relative;z-index:3;height:510vh;height:510svh;margin-top:-210vh;margin-top:-210svh;--k:0;--bgk:0;--sk:0;--ik:0;--ui:0;--fs:1}
+.psticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;pointer-events:none}
+.psticky.live{pointer-events:auto}
+.psticky:before{content:"";position:absolute;inset:0;opacity:var(--bgk);background:radial-gradient(ellipse 60% 70% at 0% 100%,rgba(140,72,28,.55),transparent 70%),radial-gradient(ellipse 50% 60% at 100% 0%,rgba(56,36,22,.5),transparent 70%),var(--bg2)}
 #surec svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 /* Süreç başlığı: soluk büyük harf satır + parlak normal satır */
-.phead{position:absolute;z-index:3;left:clamp(16px,3vw,40px);top:20%;margin:0;max-width:24vw;font:600 clamp(28px,3.1vw,46px)/1.02 var(--f)}
+.phead{opacity:var(--ui);transform:translateY(calc((1 - var(--ui))*24px));position:absolute;z-index:3;left:clamp(16px,3vw,40px);top:20%;margin:0;max-width:24vw;font:600 clamp(28px,3.1vw,46px)/1.02 var(--f)}
 .phead span{display:block;margin-bottom:.12em;font-size:.68em;text-transform:uppercase;color:rgba(255,237,215,.6)}
 
 /* Süreç sahnesi: ortada kesikli çerçeve, içinde stüdyo zemini ve 3B sahne */
-.pstage{position:absolute;z-index:2;left:50%;top:48%;transform:translate(-50%,-50%);width:min(40vw,64svh);aspect-ratio:3/4;padding:9px;border:1.5px dashed rgba(255,237,215,.75);background:var(--bg2);outline:none}
-.pstage:before{content:"";position:absolute;inset:9px;background:var(--bark)}
+.pstage{position:absolute;z-index:2;left:50%;top:48%;transform:translate(-50%,-50%) scale(var(--fs));width:min(40vw,64svh);aspect-ratio:3/4;padding:9px;border:1.5px dashed rgba(255,237,215,calc(.75*var(--k)));background:rgba(16,9,4,var(--ik));box-shadow:0 0 0 300vmax rgba(16,9,4,var(--sk));outline:none}
+.pstage:before{content:"";position:absolute;inset:9px;background:var(--bark);opacity:var(--ik)}
 .pstage:focus-visible{border-color:var(--ember)}
-.pstage canvas{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px);display:block}
+.pstage canvas{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px);display:block;opacity:var(--ik)}
 
 /* Süreç kartı: çerçevenin altındaki koyu bilgi şeridi */
-.pinfo{position:absolute;left:calc(9px + 5%);right:calc(9px + 5%);bottom:calc(9px + 3%);display:flex;flex-direction:column;gap:8px;padding:8px 8px 12px;background:rgba(16,9,4,.94);transition:opacity .3s,transform .3s}
-.pinfo.sw{opacity:0;transform:translateY(6px)}
+.pinfo{opacity:var(--ui);position:absolute;left:calc(9px + 5%);right:calc(9px + 5%);bottom:calc(9px + 3%);display:flex;flex-direction:column;gap:8px;padding:8px 8px 12px;background:rgba(16,9,4,.94);transition:opacity .3s,transform .3s}
+.pinfo.sw{opacity:0!important;transform:translateY(6px)}
 .pname{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px dashed rgba(255,237,215,.45);flex:none}
 .pname i svg{display:block;width:26px;height:26px}
 .pnum{display:block;font:600 10px/1 var(--f);letter-spacing:.04em;color:var(--ember);font-variant-numeric:tabular-nums}
@@ -90,7 +93,7 @@ a{color:inherit}
 .pinfo p{margin:0;padding:0 6px;font:600 10.5px/1.35 var(--f);letter-spacing:.01em;text-transform:uppercase}
 
 /* Adım şeridi: yanlarda akan küçük resimler */
-.pstrip{position:absolute;z-index:1;left:50%;top:48%;width:0;height:0}
+.pstrip{opacity:var(--ui);position:absolute;z-index:1;left:50%;top:48%;width:0;height:0}
 .pthumb{position:absolute;left:0;top:0;width:min(11.5vw,22svh);aspect-ratio:3/4;padding:0;border:0;cursor:pointer;overflow:hidden;background:var(--bark);will-change:transform}
 .pthumb img{display:block;width:100%;height:100%;object-fit:cover}
 .pthumb img:not([src]){visibility:hidden}
@@ -98,7 +101,7 @@ a{color:inherit}
 .pthumb:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 /* Alt orta: kaydırma ipucu */
-.pscroll{position:absolute;z-index:3;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;font:600 10px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
+.pscroll{opacity:var(--ui);position:absolute;z-index:3;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;font:600 10px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
 .pscroll i{width:14px;height:14px;border:1px solid var(--ink);border-radius:50%;position:relative}
 .pscroll i:after{content:"";position:absolute;left:50%;top:3px;width:1px;height:5px;margin-left:-.5px;background:var(--ink);animation:drop 1.6s ease-in-out infinite}
 

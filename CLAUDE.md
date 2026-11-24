@@ -41,7 +41,17 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 - **Tasarlayalım butonu:** Ev 7'deki "Evinizi birlikte tasarlayalım" butonu (`.cta`).
 
 **2. Süreç Bölümü** (`#surec`, `js/process.js`): oryzo.ai'deki "So portable, it's wearable" carousel'inden uyarlandı (24 Kasım 2026).
-- Bölüm ekrana sabitlenir (`.psticky`, bölüm 400svh yüksekliğinde). Sayfa kaydırıldıkça adımlar ilerler, sürükleme yok.
+- **Tek sahne (Ev → Süreç geçişi):** Kullanıcı sitenin ORYZO gibi tek sahne hissi vermesini istedi; bölümler arasında normal sayfa kayması görünmemeli.
+  - `#hero` 870svh. Son 110svh'de ev Ev 7'de sabit kalır; hero.js `tot`'u buna göre hesaplar (`stage.offsetHeight * 2.1`).
+  - `#surec` 510svh, `margin-top:-210svh` ve `z-index:3` ile evin üstüne biner.
+  - İlk 110svh geçiştir (`applyK`, k 0→1):
+    - kesikli çerçeve tam ekrandan çerçeve boyuna küçülür ve ev bu çerçevenin içinde bir fotoğrafa dönüşür;
+    - dışı kararır (çerçevenin `box-shadow`'u), sonra Süreç zemini gelir;
+    - çerçevenin içinde Ön Görüşme belirir;
+    - en son başlık, Adım şeridi ve Süreç kartı gelir.
+  - Geçişin ortasında kaydırma bırakılırsa yöne göre ilk adıma ya da Ev 7'ye oturur.
+  - Menüdeki "Süreç" bağlantısı geçişi atlayıp ilk adıma gider.
+- Geçişten sonra sayfa kaydırıldıkça adımlar ilerler, sürükleme yok.
 - **Adım yakalama (snap):** Kullanıcı her adımın çerçevede tam ortalanmasını istedi.
   - İlk sürümde geçiş zor geldi, çok kaydırmak gerekiyordu. Şimdiki çözüm yöne bakan yakalama (`snapToStep`, `PUSH=.1`): kaydırma 110 ms durunca, son adımdan o yöne bir adımın %10'u (yaklaşık 40 px, tek fare tıkından az) kaydırılmışsa bir sonraki adıma geçilir, daha azsa yerinde kalınır.
   - Hafif mıknatıs (`magnet`, `HOLD=.08`).

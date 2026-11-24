@@ -21,24 +21,46 @@ function show(i){if(i===shown)return;const first=shown<0;shown=i;
     info.querySelector('p').textContent=l.querySelector('p').textContent;info.querySelector('.pname i').innerHTML=l.querySelector('svg').outerHTML;info.classList.remove('sw')};
   if(first||reduce){put();return}info.classList.add('sw');clearTimeout(swT);swT=setTimeout(put,240)}
 
-// kaydırma ilerlemesi -> adım (0..N-1)
-function progress(){const r=sec.getBoundingClientRect(),span=sec.offsetHeight-innerHeight;return span>0?clamp(-r.top/span):0}
-function goTo(i){const span=sec.offsetHeight-innerHeight,top=sec.getBoundingClientRect().top+scrollY;
-  scrollTo({top:top+span*(i/(N-1)),behavior:reduce?'auto':'smooth'})}
+// Tek sahne: bölüm Ev Bölümü'nün son kısmının üstüne biner. İlk TR (ekranın 1,1 katı) kaydırma geçiştir.
+const ps=sec.querySelector('.psticky');
+const TR=()=>ps.offsetHeight*1.1;
+const span=()=>Math.max(1,sec.offsetHeight-ps.offsetHeight-TR());
+// geçiş ilerlemesi (0: ev, 1: süreç çerçevesi hazır)
+function kVal(){return clamp(-sec.getBoundingClientRect().top/TR())}
+// kaydırma ilerlemesi -> adım (0..N-1), geçişten sonra başlar
+function progress(){return clamp((-sec.getBoundingClientRect().top-TR())/span())}
+const secTop=()=>sec.getBoundingClientRect().top+scrollY;
+function goTo(i){scrollTo({top:secTop()+TR()+span()*(i/(N-1)),behavior:reduce?'auto':'smooth'})}
+// Geçiş: ev, kesikli çerçevenin içinde bir "fotoğrafa" dönüşür; dışı kararır, sonra ilk sahne belirir.
+let lastK=-1;
+function applyK(k){if(Math.abs(k-lastK)<.0005)return;lastK=k;
+  const fw=stage.offsetWidth,fh=stage.offsetHeight,s0=Math.max(innerWidth/fw,ps.offsetHeight/fh)*1.02,x=clamp((k-.04)/.7),fk=1-(1-x)*(1-x)*(1-x);
+  const st=sec.style;
+  st.setProperty('--k',ss(k,.05,.5).toFixed(3));                        // çerçeve çizgisi belirir
+  st.setProperty('--fs',(s0+(1-s0)*fk).toFixed(4));                      // tam ekrandan çerçeve boyuna küçülür
+  st.setProperty('--sk',(ss(k,.05,.55)*(1-ss(k,.86,1))).toFixed(3));    // çerçevenin dışı kararır
+  st.setProperty('--bgk',ss(k,.5,.86).toFixed(3));                       // süreç zemini gelir
+  st.setProperty('--ik',ss(k,.58,.9).toFixed(3));                        // çerçevenin içinde ilk sahne belirir
+  st.setProperty('--ui',ss(k,.8,1).toFixed(3));                          // başlık, şerit, bilgi kartı
+  ps.classList.toggle('live',k>.98)}
 // Mıknatıs: her adımın çevresinde sahne tam ortada durur, geçiş yalnızca adımların arasındaki dar bölgede olur.
 const HOLD=.08;
 function magnet(raw){const i=Math.floor(raw),t=raw-i;if(i>=N-1)return N-1;
   const u=clamp((t-HOLD)/(1-2*HOLD));return i+u*u*(3-2*u)}
 // Kaydırma durunca adıma otur. Yöne bakar: o yöne birazcık (%10) kaydırmak bir sonraki adıma geçmeye yeter.
 const PUSH=.1;
-let idleT=0,snapping=false,base=0;
-function snapToStep(){const r=sec.getBoundingClientRect();if(r.top>1||r.bottom<innerHeight-1){base=Math.round(progress()*(N-1));return} // bölüm ekrana sabit değilse karışma
+let idleT=0,snapping=false,base=0,lastY=scrollY,dirY=0;
+function snapToStep(){const r=sec.getBoundingClientRect();if(r.top>1||r.bottom<ps.offsetHeight-1){base=Math.round(progress()*(N-1));return} // bölüm ekrana sabit değilse karışma
+  // geçişin ortasında bırakıldıysa: aşağı gidiyorsa ilk adıma, yukarı gidiyorsa evin son hâline otur
+  const k=kVal();if(k<.999){if(k<.004)return;base=0;snapping=true;clearTimeout(snapT);snapT=setTimeout(()=>{snapping=false},1500);
+    scrollTo({top:dirY>=0?secTop()+TR():secTop(),behavior:reduce?'auto':'smooth'});return}
   const raw=progress()*(N-1),d=raw-base;if(Math.abs(d)<.004)return;
   let i;if(d>0){const f=Math.floor(raw);i=raw-f>PUSH?f+1:f}else{const c=Math.ceil(raw);i=c-raw>PUSH?c-1:c}
   i=clamp(i,0,N-1);base=i;if(Math.abs(raw-i)<.004)return;snapping=true;goTo(i);clearTimeout(snapT);snapT=setTimeout(()=>{snapping=false},1500)}
 let snapT=0;
-function onScroll(){const raw=progress()*(N-1);target=magnet(raw);if(reduce)cur=target;show(Math.round(target));dirty=true;
-  if(snapping&&Math.abs(raw-base)<.01){snapping=false;clearTimeout(snapT)} // otomatik kaydırma hedefe vardı
+function onScroll(){const y=scrollY;if(y!==lastY){dirY=y>lastY?1:-1;lastY=y}
+  applyK(kVal());const raw=progress()*(N-1);target=magnet(raw);if(reduce)cur=target;show(Math.round(target));dirty=true;
+  if(snapping&&kVal()>.999&&Math.abs(raw-base)<.01){snapping=false;clearTimeout(snapT)} // otomatik kaydırma hedefe vardı
   clearTimeout(idleT);if(!snapping)idleT=setTimeout(snapToStep,110)}
 addEventListener('scroll',onScroll,{passive:true});
 stage.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){goTo(clamp(Math.round(target)+1,0,N-1));e.preventDefault()}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){goTo(clamp(Math.round(target)-1,0,N-1));e.preventDefault()}});
@@ -48,7 +70,9 @@ function placeStrip(p){const fw=stage.offsetWidth,tw=thumbs[0].offsetWidth,gap=M
   thumbs.forEach((t,k)=>{const d=k-p,x=d*(tw+gap)+clamp(d,-1,1)*E-tw/2;t.style.transform='translate('+x.toFixed(1)+'px,-50%)'})}
 function tick(){requestAnimationFrame(tick);const d=target-cur;if(Math.abs(d)>.0005){cur+=d*.12;dirty=true}else if(d!==0){cur=target;dirty=true}
   if(dirty)placeStrip(cur)}
-addEventListener('resize',()=>{dirty=true});
+addEventListener('resize',()=>{dirty=true;lastK=-1;applyK(kVal())});
+// Menüdeki "Süreç" bağlantısı geçişi atlayıp doğrudan ilk adıma gitsin
+document.querySelectorAll('a[href="#surec"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goTo(0)}));
 onScroll();show(Math.round(target));cur=target;requestAnimationFrame(tick);
 if (typeof THREE === 'undefined') return;
 // 3B sahne bölüme yaklaşınca kurulur, ilk açılış hafif kalsın

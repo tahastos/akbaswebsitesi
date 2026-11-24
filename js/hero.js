@@ -545,7 +545,8 @@ function resize(force) {
   cam.updateProjectionMatrix(); dirty = true;
 }
 function calc() {
-  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight);
+  // son 110svh geçiş içindir (Süreç Bölümü ev'in üstüne biner), ev adımları ondan önce biter
+  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.1);
   target = reduce ? LAST : clamp(-r.top / tot) * LAST; if (Math.abs(target - cur) > .0008) dirty = true;
 }
 addEventListener('scroll', calc, { passive: true });
