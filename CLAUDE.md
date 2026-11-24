@@ -42,7 +42,9 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
 
 **2. Süreç Bölümü** (`#surec`, `js/process.js`): oryzo.ai'deki "So portable, it's wearable" carousel'inden uyarlandı (24 Kasım 2026).
 - **Tek sahne (Ev → Süreç geçişi):** Kullanıcı sitenin ORYZO gibi tek sahne hissi vermesini istedi; bölümler arasında normal sayfa kayması görünmemeli.
-  - `#hero` 870svh. Son 110svh'de ev Ev 7'de sabit kalır; hero.js `tot`'u buna göre hesaplar (`stage.offsetHeight * 2.1`).
+  - `#hero` 910svh; hero.js `tot`'u buna göre hesaplar (`stage.offsetHeight * 2.5` = 210svh bindirme + 40svh bekleme).
+  - Ev 7 tamamlandıktan sonra, Süreç geçişi başlamadan önce 40svh (~3 fare kaydırması) bekleme payı var. Kullanıcı 25 Kasım 2026'da istedi; eskiden bekleme yoktu ve tek kaydırmada Süreç'e iniliyordu. "Fazla gelirse azaltırız" dedi: azaltmak için CSS'teki 910'u ve hero.js'teki 2,5'i birlikte değiştir (her 10svh = 0,1).
+  - Genel bakış kadrajları (Ev 1, 2, 7) aynı gün ~%15 genişletildi. Geniş ekranda model hafifçe aşağıda duruyor (`setViewOffset` −0,04); eskiden üst köşe dev logonun altında kalıyordu.
   - `#surec` 510svh, `margin-top:-210svh` ve `z-index:3` ile evin üstüne biner.
   - İlk 110svh geçiştir (`applyK`, k 0→1):
     - kesikli çerçeve tam ekrandan çerçeve boyuna küçülür ve ev bu çerçevenin içinde bir fotoğrafa dönüşür;
@@ -82,6 +84,7 @@ Kullanıcı siteyi anlatırken bu adları kullanır; sen de yanıtlarında aynı
   - Düzen oryzo.ai'den alındı: Ev Bölümü'nün zemini yeşil kesim matı (ızgaralı), ilk adımda dev logo, sağ üstte küçük menü, sol altta yarı saydam kart, altta "Kaydırarak devam edin", sağ kenarda krem dikey şerit içinde Ev noktaları. Süreç Bölümü koyu "void" zeminde.
   - Köşe yuvarlaklıkları: kart 12px, çerçeveli buton 22.5px, dolu buton 36px. Gölge yok.
   - Canvas UI efektleri denendi, hiçbiri beğenilmedi ve silindi; tekrar önerme. React Bits'teki tasarımları ise beğeniyor.
+  - "Tek Ev" fikri denendi (25 Kasım 2026), beğenilmedi ve silindi; tekrar önerme. Fikir şuydu: ORYZO'daki bardak altlığı gibi, bütün sayfa boyunca arkada sabit duran tek bir ev; ev Süreç adımlarıyla birlikte kurulup dönüyor, kartlar önünden kayıyor. Kullanıcı mevcut site yapısıyla (Ev Bölümü, sonra Süreç Bölümü) devam etmek istiyor.
 - `js/shared.js`: `window.AKBAS` altında iki sahnenin ortak yardımcıları: `M` (malzeme), `B` (yuvarlatılmış kutu), `BX`, `Cy`, `Sp`, `canvasTex`, `makeRnd`, `makeRenderer`, `clamp`, `e3`, `ss`.
 - `js/hero.js`: ev modeli (okunur biçimde yazılmış).
 - `js/process.js`: Süreç Bölümü (kaydırma, Adım şeridi ve altı stüdyo sahnesi). Okunur biçimde yazıldı.

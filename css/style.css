@@ -3,7 +3,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg2);color:var(--ink);font:400 16px/1.45 var(--f)}
 a{color:inherit}
-#hero{height:870vh;height:870svh;position:relative}
+#hero{height:910vh;height:910svh;position:relative}
 
 /* Ev Bölümü: yeşil kesim matı zemin (ızgara + cetvel çizgileri) */
 .stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;

@@ -497,13 +497,14 @@ function makeLabels() {
 
 /* ---------- camera tour: one key pose per caption (yaw/pitch in degrees, rx/ry = half extents to frame) ---------- */
 const KF = [
-  { c: [7.3, .4, 5.4], yaw: 45, pitch: 34, rx: 10.8, ry: 5.5 },  // empty flat
-  { c: [7.4, 0, 5.6], yaw: 38, pitch: 60, rx: 10.2, ry: 6.8 },   // plan + room names
+  // genel bakışlar (Ev 1, 2, 7) 25 Kasım 2026'da ~%15 genişletildi: evin üst köşesi logonun altında kalıyordu
+  { c: [7.3, .4, 5.4], yaw: 45, pitch: 34, rx: 12.4, ry: 6.4 },  // empty flat
+  { c: [7.4, 0, 5.6], yaw: 38, pitch: 60, rx: 11.6, ry: 7.8 },   // plan + room names
   { c: [2.4, 1.1, 9.5], yaw: 62, pitch: 36, rx: 4.1, ry: 3.1 },  // kitchen + dining
   { c: [11.9, .6, 5.6], yaw: 30, pitch: 46, rx: 5.2, ry: 4.6 },  // living room + balcony
   { c: [2.5, .9, 2.6], yaw: 24, pitch: 38, rx: 3.8, ry: 2.7 },   // bedroom
   { c: [4.2, .5, 4.9], yaw: 40, pitch: 52, rx: 6.4, ry: 4.3 },   // bath, study, hall
-  { c: [7.3, .4, 5.4], yaw: 45, pitch: 36, rx: 10.8, ry: 5.5 }   // finished, evening
+  { c: [7.3, .4, 5.4], yaw: 45, pitch: 36, rx: 12.4, ry: 6.4 }   // finished, evening
 ];
 const DEG = PI / 180, tgt = new THREE.Vector3(), tanV = Math.tan(cam.fov * DEG / 2);
 let aspect = 1;
@@ -541,12 +542,14 @@ let cur = reduce ? LAST : 0, target = cur, dirty = true, visible = true, pxT = 0
 function resize(force) {
   const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h || (!force && w === cw && h === ch)) return; cw = w; ch = h;
   R.setSize(w, h, false); aspect = w / h; cam.aspect = aspect;
-  cam.setViewOffset(w, h, 0, h * (aspect < 1 ? .1 : .05), w, h);  // lift the model above the captions
+  // dikey ekranda model yazıların üstüne kalkar; geniş ekranda hafifçe aşağı iner ki üst köşe dev logonun altında kalmasın
+  cam.setViewOffset(w, h, 0, h * (aspect < 1 ? .08 : -.04), w, h);
   cam.updateProjectionMatrix(); dirty = true;
 }
 function calc() {
-  // son 110svh geçiş içindir (Süreç Bölümü ev'in üstüne biner), ev adımları ondan önce biter
-  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.1);
+  // Ev adımları, Süreç Bölümü üstüne binmeden 0,4 ekran önce biter: ev Ev 7'de ~3 fare kaydırması bekler,
+  // sonra geçiş başlar (210svh bindirme + 40svh bekleme = 2,5). #hero yüksekliği CSS'te buna göre 910svh.
+  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.5);
   target = reduce ? LAST : clamp(-r.top / tot) * LAST; if (Math.abs(target - cur) > .0008) dirty = true;
 }
 addEventListener('scroll', calc, { passive: true });
