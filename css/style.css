@@ -11,16 +11,17 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg2);color:var(--ink);font:400 16px/1.45 var(--f)}
 a{color:inherit}
-#hero{height:755vh;height:755svh;position:relative}
+#hero{height:670vh;height:670svh;position:relative}
 
 /* Ev Bölümü: düz koyu yeşil zemin, soluk krem ızgara, krem yazı.
-   Denenip beğenilmeyenler: mavi zemin, altın zemin, kesim matı deseni (cetvel, açı çizgileri); tekrar önerme. */
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;color:var(--krem);
+   Denenip beğenilmeyenler: mavi zemin, altın zemin, kesim matı deseni (cetvel, açı çizgileri); tekrar önerme.
+   Ev → Süreç geçişinde (--gk 0→1, process.js) zemin yeşilden kreme, yazı kremden bordoya akar; bir anda kesme yok. */
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;
+  color:color-mix(in srgb,var(--bordo) calc(var(--gk,0)*100%),var(--krem));
   background:
-    linear-gradient(rgba(90,14,39,var(--sk,0)),rgba(90,14,39,var(--sk,0))),   /* Ev → Süreç geçişinde zemin bordoya döner (process.js) */
     linear-gradient(90deg,rgba(244,237,225,.18) 1px,transparent 1px) 0 0/200px 200px,
     linear-gradient(rgba(244,237,225,.18) 1px,transparent 1px) 0 0/200px 200px,
-    var(--yesil)}
+    color-mix(in srgb,var(--krem) calc(var(--gk,0)*100%),var(--yesil))}
 .stage.drag{cursor:grabbing}
 .brand,.menu,.hcard,.hscroll,.caps,.dots,.hhint{z-index:2}
 /* Ev → Süreç geçişinde (hero.js --hk) ev yazısı, Ev kartı ve noktalar çekilir; logo ve menü kalır */
@@ -36,7 +37,7 @@ a{color:inherit}
 /* Menü */
 .menu{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));right:clamp(64px,7vw,96px);display:flex;gap:clamp(14px,2vw,28px)}
 .menu a{font:600 11px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;text-decoration:none;padding:4px 0;border-bottom:1px solid transparent}
-.menu a:hover,.menu a:focus-visible{border-bottom-color:var(--krem);outline:none}
+.menu a:hover,.menu a:focus-visible{border-bottom-color:currentColor;outline:none}
 
 /* Ev yazıları: sağda, sola yaslı, normal harfli gövde metni */
 .caps{position:absolute;right:clamp(64px,6vw,96px);bottom:calc(78px + env(safe-area-inset-bottom,0px));width:min(340px,32vw);display:grid;align-items:end;pointer-events:none}
@@ -75,32 +76,29 @@ a{color:inherit}
 .wa:focus-visible,.cta:focus-visible{outline:2px solid var(--bordo);outline-offset:3px}
 
 /* Süreç Bölümü: ORYZO tarzı kaydırmalı carousel. Bölüm ekrana sabitlenir, kaydırdıkça adımlar ilerler. */
-/* Tek sahne: Süreç Bölümü, Ev Bölümü'nün son 340svh'sinin üstüne biner. İlk 240svh geçiştir: çerçeve evin planından doğar (process.js applyK). */
-#surec{position:relative;z-index:3;height:640vh;height:640svh;margin-top:-340vh;margin-top:-340svh;--k:0;--bgk:0;--sk:0;--ik:0;--ui:0;--bl:0px;--fsx:1;--fsy:1;--fx:0px;--fy:0px}
+/* Tek sahne: Süreç Bölümü, Ev Bölümü'nün son 240svh'sinin üstüne biner. İlk 140svh geçiştir: çerçeve evin planından doğar (process.js applyK). */
+#surec{position:relative;z-index:3;height:540vh;height:540svh;margin-top:-240vh;margin-top:-240svh;--k:0;--bgk:0;--ik:0;--ui:0;--wp:0;--fsx:1;--fsy:1;--fx:0px;--fy:0px}
 .psticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;pointer-events:none}
 .psticky.live{pointer-events:auto}
 .psticky:before{content:"";position:absolute;inset:0;opacity:var(--bgk);background:var(--krem)}
 #surec svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 
 /* Süreç başlığı: soluk büyük harf satır + parlak normal satır */
-.phead{opacity:var(--ui);transform:translateY(calc((1 - var(--ui))*24px));position:absolute;z-index:3;left:clamp(16px,3vw,40px);top:20%;margin:0;max-width:24vw;font:600 clamp(28px,3.1vw,46px)/1.02 var(--f)}
+.phead{clip-path:inset(0 0 calc((1 - var(--ui))*100%) 0);transform:translateY(calc((1 - var(--ui))*36px));position:absolute;z-index:3;left:clamp(16px,3vw,40px);top:20%;margin:0;max-width:24vw;font:600 clamp(28px,3.1vw,46px)/1.02 var(--f)}
 .phead span{display:block;margin-bottom:.12em;font-size:.68em;text-transform:uppercase;color:var(--bordo)}
 
 /* Süreç sahnesi: ortada kesikli çerçeve, içinde stüdyo zemini ve 3B sahne */
-/* Çerçeve geçişte evin planının hattına yapışık doğar (--fsx/--fsy: planın oranından 3:4'e, --fx/--fy: ekran ortasından yerine).
-   İçinde Ön Görüşme bulanık belirip evi örter (--ik) ve inerken netleşir (--bl); çizgi bordo zeminde krem, krem Süreç zemini gelince bordo. */
+/* Çerçeve geçişte evin planının hattında doğar (--fsx/--fsy: planın oranından 3:4'e, --fx/--fy: ekran ortasından yerine).
+   ORYZO'daki gibi: kalın kenar yok, yalnızca bordo kesik çizgi; çizgiyle görsel arasında ince boşluk. Geçişte içi boş (--ik 0). */
 .pstage{position:absolute;z-index:2;left:50%;top:48%;transform:translate(calc(-50% + var(--fx)),calc(-50% + var(--fy))) scale(var(--fsx),var(--fsy));width:min(40vw,64svh);aspect-ratio:3/4;padding:9px;
-  border:1.5px dashed rgba(244,237,225,calc(.9*var(--k)));
-  border-color:color-mix(in srgb,color-mix(in srgb,var(--krem) calc((1 - var(--bgk))*100%),var(--bordo)) calc(var(--k)*90%),transparent);
-  background:rgba(90,14,39,var(--ik));outline:none;will-change:transform}
-.psticky.live .pstage{border-color:var(--bordo)}
-.pstage:before{content:"";position:absolute;inset:9px;background:var(--bark);opacity:var(--ik)}
+  border:1.5px dashed rgba(90,14,39,var(--k));outline:none;will-change:transform}
 .pstage:focus-visible{border-color:var(--ember)}
-.pstage canvas{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px);display:block;opacity:var(--ik);filter:blur(var(--bl))}
-.pstage:before,.pstage canvas{overflow:hidden}
+/* krem perde: çerçeve doğunca ev içeriden yukarıdan aşağı, net bir kenarla silinir (--wp 0→1); saydamlık yok */
+.pstage:before{content:"";position:absolute;inset:0;background:var(--krem);clip-path:inset(0 0 calc((1 - var(--wp))*100%) 0)}  /* sahnenin arkasındaki krem iç boşluk, sahneyle birlikte iner */
+.pstage canvas{position:absolute;inset:9px;width:calc(100% - 18px);height:calc(100% - 18px);display:block;opacity:var(--ik);clip-path:inset(0 0 calc((1 - var(--wp))*100%) 0)}
 
 /* Süreç kartı: çerçevenin altındaki koyu bilgi şeridi */
-.pinfo{opacity:var(--ui);position:absolute;left:calc(9px + 5%);right:calc(9px + 5%);bottom:calc(9px + 3%);display:flex;flex-direction:column;gap:8px;padding:8px 8px 12px;background:var(--bordo);color:var(--krem);transition:opacity .3s,transform .3s}
+.pinfo{clip-path:inset(calc((1 - var(--ui))*100%) 0 0 0);transform:translateY(calc((1 - var(--ui))*18px));position:absolute;left:calc(9px + 5%);right:calc(9px + 5%);bottom:calc(9px + 3%);display:flex;flex-direction:column;gap:8px;padding:8px 8px 12px;background:var(--bordo);color:var(--krem);transition:opacity .3s,transform .3s}
 .pinfo.sw{opacity:0!important;transform:translateY(6px)}
 .pname{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px dashed var(--altin);flex:none}
 .pname i svg{display:block;width:26px;height:26px}
@@ -109,7 +107,8 @@ a{color:inherit}
 .pinfo p{margin:0;padding:0 6px;font:600 10.5px/1.35 var(--f);letter-spacing:.01em;text-transform:uppercase}
 
 /* Adım şeridi: yanlarda akan küçük resimler */
-.pstrip{opacity:var(--ui);position:absolute;z-index:1;left:50%;top:48%;width:0;height:0}
+.pstrip{position:absolute;z-index:1;left:50%;top:48%;width:0;height:0}
+.psticky:not(.strip) .pstrip{visibility:hidden}
 .pthumb{position:absolute;left:0;top:0;width:min(11.5vw,22svh);aspect-ratio:3/4;padding:0;border:0;cursor:pointer;overflow:hidden;background:var(--krem);will-change:transform}
 .pthumb img{display:block;width:100%;height:100%;object-fit:cover}
 .pthumb img:not([src]){visibility:hidden}
@@ -117,7 +116,7 @@ a{color:inherit}
 .pthumb:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
 /* Alt orta: kaydırma ipucu */
-.pscroll{opacity:var(--ui);position:absolute;z-index:3;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;font:600 10px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
+.pscroll{clip-path:inset(0 0 calc((1 - var(--ui))*100%) 0);position:absolute;z-index:3;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;font:600 10px/1 var(--f);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
 .pscroll i{width:14px;height:14px;border:1px solid var(--ink);border-radius:50%;position:relative}
 .pscroll i:after{content:"";position:absolute;left:50%;top:3px;width:1px;height:5px;margin-left:-.5px;background:var(--ink);animation:drop 1.6s ease-in-out infinite}
 
@@ -131,7 +130,7 @@ a{color:inherit}
   .phead{top:calc(18px + env(safe-area-inset-top,0px));max-width:none;right:16px;font-size:28px}
   .pstage,.pstrip{top:54%}
   .pstage{width:min(74vw,56svh);padding:6px}
-  .pstage:before{inset:6px}
+
   .pstage canvas{inset:6px;width:calc(100% - 12px);height:calc(100% - 12px)}
   .pthumb{width:min(30vw,20svh)}
   .pinfo{flex-direction:column;gap:6px;left:calc(6px + 4%);right:calc(6px + 4%);bottom:calc(6px + 3%);padding:6px}

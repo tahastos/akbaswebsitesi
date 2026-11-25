@@ -530,7 +530,7 @@ let aspect = 1;
 /* Ev → Süreç transition progress, the same value process.js uses (0 = house, 1 = Süreç frame ready). */
 const surec = document.getElementById('surec');
 // fallback only: process.js normally publishes a smoothed value in AKBAS.kT
-const transK = () => surec ? clamp(-surec.getBoundingClientRect().top / (stage.offsetHeight * 2.4)) : 0;
+const transK = () => surec ? clamp(-surec.getBoundingClientRect().top / (stage.offsetHeight * 1.4)) : 0;
 // Outline of the house seen from above: slab corners, tops of the tall back walls, top of the low front corner.
 // The tall walls sit closer to the camera, so the plan is fitted by projecting these points, not by its size on paper.
 const PLAN_PTS = [[-.25, 0, -.25], [W + .25, 0, -.25], [-.25, 0, D + .25], [W + .25, 0, D + .25], [-T, H, -T], [W + T, H, -T], [-T, H, D + T], [W + T, LOW, D + T]].map(p => new THREE.Vector3(p[0], p[1], p[2]));
@@ -576,13 +576,13 @@ function placeCamera(t, yawOff, kT) {
   let ox = 0, oy = ch * (portrait ? .08 : -.04);
   // Transition: swing to the top-down pose that fits the plan's outline exactly inside the frame rectangle
   // process.js publishes (AKBAS.frame), so the dashed frame is drawn on the plan's edge and shrinks together with it.
-  // In order, so it reads as one calm move: first the house turns and rises to a top-down view (k 0–.26),
-  // then, overlapping the end of that, the lens narrows so the plan flattens into a clean rectangle (k .14–.32).
+  // In order, so it reads as one calm move: first the house turns and rises to a top-down view (k 0–.38),
+  // then, overlapping the end of that, the lens narrows so the plan flattens into a clean rectangle (k .2–.4).
   const fr = AKBAS.frame;
   let fov = FOV;
   if (kT > 0 && fr && fr.w > 0) {
-    const s1 = clamp(kT / .26), q = s1 * s1 * s1 * (s1 * (s1 * 6 - 15) + 10);   // smootherstep: soft start, soft finish
-    fov += (FOV_TOP - FOV) * ss(kT, .14, .32);
+    const s1 = clamp(kT / .38), q = s1 * s1 * s1 * (s1 * (s1 * 6 - 15) + 10);   // smootherstep: soft start, soft finish
+    fov += (FOV_TOP - FOV) * ss(kT, .2, .4);
     const B = fitTop(fr, fov);
     yaw += (90 - yaw) * q; pitch += (89.6 - pitch) * q;
     dist = Math.exp(Math.log(dist) + (Math.log(B.dist) - Math.log(dist)) * q);
@@ -619,9 +619,9 @@ function resize(force) {
   cam.updateProjectionMatrix(); dirty = true;   // view offset is set every frame in placeCamera
 }
 function calc() {
-  // Ev adımları (4 adım, 390svh) Süreç Bölümü üstüne binmeden 0,25 ekran önce biter: ev son adımda ~2 fare kaydırması bekler,
-  // sonra geçiş başlar (340svh bindirme + 25svh bekleme = 3,65). #hero yüksekliği CSS'te buna göre 755svh (= 390 + 365).
-  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 3.65);
+  // Ev adımları (4 adım, 390svh) Süreç Bölümü üstüne binmeden 0,4 ekran önce biter: ev son adımda ~3 fare kaydırması bekler,
+  // sonra geçiş başlar (240svh bindirme + 40svh bekleme = 2,8). #hero yüksekliği CSS'te buna göre 670svh (= 390 + 280).
+  const r = hero.getBoundingClientRect(), tot = Math.max(1, hero.offsetHeight - stage.offsetHeight * 2.8);
   target = reduce ? LAST : clamp(-r.top / tot) * LAST; if (Math.abs(target - cur) > .0008) dirty = true;
 }
 addEventListener('scroll', calc, { passive: true });
@@ -659,9 +659,9 @@ function frame(now) {
   const dp = pxT - pxC; if (Math.abs(dp) > .0005) { pxC += dp * .06; dirty = true; }
   // transition value comes already smoothed from process.js (AKBAS.kT), so the camera never jumps with the wheel
   const kk = AKBAS.kT !== undefined ? AKBAS.kT : transK(); if (Math.abs(kk - kT) > .0002) { kT = kk; dirty = true; }
-  // once the blurred first Süreç scene fully covers the house (k > .56) the house canvas is hidden and not drawn at all;
-  // the frame then shrinks over the plain bordo Ev background
-  const hide = kT > .56;
+  // at k .54 the krem curtain has wiped the house out of the frame (process.js KW): from then on
+  // the house canvas is hidden and not drawn at all
+  const hide = kT >= .54;
   if (hide !== houseHidden) { houseHidden = hide; cv.style.visibility = hide ? 'hidden' : ''; dirty = true; }
   if (!dirty || houseHidden) return; dirty = false;
   update(cur); R.render(scene, cam);

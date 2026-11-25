@@ -21,9 +21,9 @@ function show(i){if(i===shown)return;const first=shown<0;shown=i;
     info.querySelector('p').textContent=l.querySelector('p').textContent;info.querySelector('.pname i').innerHTML=l.querySelector('svg').outerHTML;info.classList.remove('sw')};
   if(first||reduce){put();return}info.classList.add('sw');clearTimeout(swT);swT=setTimeout(put,240)}
 
-// Tek sahne: bölüm Ev Bölümü'nün son kısmının üstüne biner. İlk TR (ekranın 2,4 katı) kaydırma geçiştir; 1,1 ve 1,6 denendi, kullanıcı ikisini de sert ve hızlı buldu (25 Kasım 2026).
+// Tek sahne: bölüm Ev Bölümü'nün son kısmının üstüne biner. İlk TR (ekranın 1,4 katı) kaydırma geçiştir. 1,1 / 1,6 / 2,4 denendi; kullanıcı en son "hızlı ama yumuşak" istedi (25 Kasım 2026).
 const ps=sec.querySelector('.psticky');
-const TR=()=>ps.offsetHeight*2.4;
+const TR=()=>ps.offsetHeight*1.4;
 const span=()=>Math.max(1,sec.offsetHeight-ps.offsetHeight-TR());
 // geçiş ilerlemesi (0: ev, 1: süreç çerçevesi hazır)
 function kVal(){return clamp(-sec.getBoundingClientRect().top/TR())}
@@ -31,39 +31,46 @@ function kVal(){return clamp(-sec.getBoundingClientRect().top/TR())}
 function progress(){return clamp((-sec.getBoundingClientRect().top-TR())/span())}
 const secTop=()=>sec.getBoundingClientRect().top+scrollY;
 function goTo(i){scrollTo({top:secTop()+TR()+span()*(i/(N-1)),behavior:reduce?'auto':'smooth'})}
-// Geçiş (25 Kasım 2026): çerçeve evin planından doğar, içinde Ön Görüşme'nin bulanık hâli evi örter, inerken netleşir.
-//   k 0–.30   hero.js kamerayı evin tam tepesine çevirir; dikdörtgen plan ekranın ortasında büyük görünür
-//   k .26–.42 kesikli çerçeve planın dış hattına tam yapışık belirir (planın oranıyla), dışı bordoya kararır
-//   k .40–.52 çerçevenin içinde Ön Görüşme bulanık olarak belirir ve evi örter (kullanıcı: küçülürken ev görünmesin)
-//   k .50–.84 çerçeve küçülür, 3:4 orana döner ve asıl yerine kayar; sahne .60–.92 arasında netleşir
-//   k .84–1   Süreç zemini, sonra başlık, şerit ve kart gelir
-//   (Boş krem kartla inmesi denendi; kullanıcı Ön Görüşme'nin net olmayan hâliyle inmesini istedi.)
+// Geçiş (25 Kasım 2026, son hâl): çerçeve evin planından doğar, ev ile Ön Görüşme arasında hiçbir an boşluk ya da solma yok.
+//   k .10–.38 ev dönerken Ev Bölümü'nün zemini yeşilden kreme akar, logo ve menü kremden bordoya (--gk, hero .stage üstünde)
+//   k 0–.40   hero.js evi yumuşakça döndürüp tepeden düz bir dikdörtgen plan yapar (ekranın ortasında büyük)
+//   k = KC    planın genişliğinde, 3:4 oranında bordo kesik çizgili çerçeve belirir (zemin zaten krem, ekran aydınlanmaz)
+//   k KC–KW   Ön Görüşme sahnesi evin yerini yukarıdan aşağı, net bir kenarla alır (--wp; sayfa çevrilir gibi)
+//   k KW–.92  çerçeve içinde net Ön Görüşme ile küçülür ve asıl yerine kayar (tek ölçek, sahne gerilmez)
+//   k .78–1   başlık aşağıdan açılır, Adım şeridi kenarlardan kayar, Süreç kartı alttan açılır (--ui, uiK)
+//   Denenip bırakılanlar: kararma, bulanık Ön Görüşme, krem dolgu, boş çerçeve, solarak ya da bir anda gelen öğeler,
+//   yeşilden kreme bir anda kesme (kullanıcı: "sitede her şey denge ve ahenk içinde olmalı").
+const KC=.42,KW=.54;
+const heroStage=document.querySelector('#hero .stage');
 // Akıcılık: geçiş değeri kaydırmayı doğrudan değil, yumuşak bir gecikmeyle izler (kS → kTarget, tick içinde),
 // böylece fare tekerleğinin adım adım kaydırması animasyonda zıplama yapmaz. Çerçeve ölçüleri yalnızca boyut değişince okunur.
-const heroStage=document.querySelector('#hero .stage');
 let lastK=-1,kTarget=0,kS=0,G0=null;
 function measureFrame(){G0={fw:stage.offsetWidth,fh:stage.offsetHeight,fcx:stage.offsetLeft,fcy:stage.offsetTop,vw:ps.offsetWidth,vh:ps.offsetHeight}}
 function applyK(k){if(Math.abs(k-lastK)<.0003)return;lastK=k;AKBAS.kT=k;
   // çerçevenin asıl yeri: left 50% / top 48% (telefonda 54%) ve translate(-50%,-50%) → offsetLeft/Top merkezdir
   if(!G0)measureFrame();const {fw,fh,fcx,fcy,vw,vh}=G0;
-  // doğduğu an: evin üstten görünen hattıyla aynı oranda (hero.js AKBAS.planAspect'i ölçer), ekranın %86'sına sığan büyüklükte
-  const pa=AKBAS.planAspect||.8,bh=Math.min(vh*.86,vw*.86/pa),bw0=bh*pa;
-  const m=ss(k,.5,.84),w=bw0+(fw-bw0)*m,h=bh+(fh-bh)*m;
-  const cx=vw/2+(fcx-vw/2)*m,cy=vh/2+(fcy-vh/2)*m;
+  // doğduğu an: çerçeve kendi 3:4 oranında, genişliği evin planının genişliği kadar (zemin artık krem; planın üstünde ve
+  // altında kalan ince krem boşluk sorun değil). Tek ölçek kullanılır ki içindeki Ön Görüşme sahnesi gerilip bozulmasın.
+  const pa=AKBAS.planAspect||.8,ph=Math.min(vh*.86,vw*.86/pa),s0=ph*pa/fw;
+  const sm=x=>x*x*x*(x*(x*6-15)+10);                                     // smootherstep: hızlı ama yumuşak
+  const m=sm(clamp((k-KW)/(.92-KW)));
+  const s=s0+(1-s0)*m,cx=vw/2+(fcx-vw/2)*m,cy=vh/2+(fcy-vh/2)*m;
   const st=sec.style;
-  st.setProperty('--k',ss(k,.26,.4).toFixed(3));                          // planın hattında çerçeve çizgisi belirir
-  st.setProperty('--fsx',(w/fw).toFixed(4));st.setProperty('--fsy',(h/fh).toFixed(4)); // planın boyundan çerçeve boyuna
+  if(heroStage)heroStage.style.setProperty('--gk',sm(clamp((k-.1)/.28)).toFixed(3)); // zemin yeşilden kreme akar
+  st.setProperty('--k',k>=KC?'1':'0');                                     // kesik çizgili çerçeve (aç/kapa, solma yok)
+  st.setProperty('--ik',k>=KC?'1':'0');                                    // Ön Görüşme çerçeveyle birlikte hazır...
+  st.setProperty('--wp',sm(clamp((k-KC)/(KW-KC))).toFixed(3));             // ...ve evin yerini yukarıdan aşağı inerek alır
+  st.setProperty('--bgk',k>=KW?'1':'0');                                   // krem Süreç zemini (ekran zaten krem; görünür bir değişim yok)
+  st.setProperty('--fsx',s.toFixed(4));st.setProperty('--fsy',s.toFixed(4)); // planın boyundan çerçeve boyuna
   st.setProperty('--fx',(cx-fcx).toFixed(1)+'px');st.setProperty('--fy',(cy-fcy).toFixed(1)+'px'); // ekran ortasından çerçevenin yerine
-  // çerçevenin dışı kararır: çerçeve plana yapışık doğduğu için dışarıda yalnızca Ev Bölümü'nün yeşil zemini var;
-  // onu bordoya çevirmek yeterli (eskiden dev bir box-shadow'du, her karede yeniden çizildiği için kasıyordu)
-  if(heroStage)heroStage.style.setProperty('--sk',ss(k,.28,.42).toFixed(3));
-  st.setProperty('--ik',ss(k,.4,.52).toFixed(3));                         // çerçevenin içinde ilk sahne belirir, evi örter
-  st.setProperty('--bl',(16*(1-ss(k,.6,.92))).toFixed(2)+'px');           // sahne bulanık başlar, yerine inerken netleşir
-  st.setProperty('--bgk',ss(k,.84,.97).toFixed(3));                       // süreç zemini gelir
-  st.setProperty('--ui',ss(k,.9,1).toFixed(3));                           // başlık, şerit, bilgi kartı
-  ps.classList.toggle('live',k>.98);
-  // hero.js evin planını bu dikdörtgene, çerçevenin dış kenarına tam oturtur (ekran koordinatında)
-  AKBAS.frame={cx,cy,w,h}}
+  // başlık, Adım şeridi ve Süreç kartı çerçeve yerine otururken hareketle gelir (saydamlık değil, kayma ve açılma)
+  uiK=sm(clamp((k-.78)/(1-.78)));st.setProperty('--ui',uiK.toFixed(3));dirty=true;
+  // çerçeve büyükken sahne bulanık görünmesin: o sürede sahne daha yüksek çözünürlükte çizilir
+  sharp=k>=KC&&k<.99?s:1;
+  ps.classList.toggle('live',k>.98);ps.classList.toggle('strip',k>=.6);   // şerit, ev silindikten sonra açılır
+  // hero.js evin planını bu dikdörtgene oturtur: çerçevenin genişliği, planın oranında yüksekliği (ekran koordinatında)
+  AKBAS.frame={cx,cy,w:fw*s,h:fw*s/pa}}
+let uiK=0,sharp=1;
 // Mıknatıs: her adımın çevresinde sahne tam ortada durur, geçiş yalnızca adımların arasındaki dar bölgede olur.
 const HOLD=.08;
 function magnet(raw){const i=Math.floor(raw),t=raw-i;if(i>=N-1)return N-1;
@@ -80,11 +87,11 @@ function snapToStep(){const r=sec.getBoundingClientRect();if(r.top>1||r.bottom<p
   i=clamp(i,0,N-1);base=i;if(Math.abs(raw-i)<.004)return;snapping=true;goTo(i);clearTimeout(snapT);snapT=setTimeout(()=>{snapping=false},1500)}
 let snapT=0;
 // Geçişte otomatik kaydırma: tarayıcının hızlı "smooth" kaydırması yerine yavaş başlayıp yavaş biten kendi animasyonumuz.
-// Süre mesafeye göre ~1,2–3,2 sn (tam geçiş ≈2,7 sn; 1,4 sn kullanıcıya hızlı geldi). Kullanıcı tekerleğe, ekrana ya da klavyeye dokunursa hemen durur.
+// Süre mesafeye göre ~0,7–1,4 sn (tam geçiş ≈1,2 sn; kullanıcı "hızlı ama yumuşak" istedi, 2,7 sn uzun geldi). Kullanıcı tekerleğe, ekrana ya da klavyeye dokunursa hemen durur.
 let softRaf=0;
 function stopSoft(){if(softRaf){cancelAnimationFrame(softRaf);softRaf=0;snapping=false}}
 function softScroll(y){stopSoft();if(reduce){scrollTo(0,y);snapping=false;return}
-  const y0=scrollY,dy=y-y0,dur=clamp(Math.abs(dy)/ps.offsetHeight*1150,1200,3200),t0=performance.now();
+  const y0=scrollY,dy=y-y0,dur=clamp(Math.abs(dy)/ps.offsetHeight*850,700,1400),t0=performance.now();
   const step=now=>{const p=clamp((now-t0)/dur),e=p*p*p*(p*(p*6-15)+10);scrollTo(0,y0+dy*e);  // smootherstep
     if(p<1)softRaf=requestAnimationFrame(step);else{softRaf=0;snapping=false}};
   softRaf=requestAnimationFrame(step)}
@@ -97,8 +104,9 @@ addEventListener('scroll',onScroll,{passive:true});
 stage.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){goTo(clamp(Math.round(target)+1,0,N-1));e.preventDefault()}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){goTo(clamp(Math.round(target)-1,0,N-1));e.preventDefault()}});
 
 // şeridi yerleştir: ortadaki adım çerçevenin arkasında, geçilenler solda, sıradakiler sağda
-function placeStrip(p){const fw=stage.offsetWidth,tw=thumbs[0].offsetWidth,gap=Math.max(10,tw*.08),E=fw/2-tw/2;
-  thumbs.forEach((t,k)=>{const d=k-p,x=d*(tw+gap)+clamp(d,-1,1)*E-tw/2;t.style.transform='translate('+x.toFixed(1)+'px,-50%)'})}
+// geçişin sonunda (uiK 0→1) küçük resimler ekranın kenarlarından kayarak yerlerine gelir
+function placeStrip(p){const fw=stage.offsetWidth,tw=thumbs[0].offsetWidth,gap=Math.max(10,tw*.08),E=fw/2-tw/2,off=(1-uiK)*ps.offsetWidth*.6;
+  thumbs.forEach((t,k)=>{const d=k-p,x=d*(tw+gap)+clamp(d,-1,1)*E-tw/2+Math.sign(d)*off;t.style.transform='translate('+x.toFixed(1)+'px,-50%)'})}
 let lastTick=performance.now();
 function tick(now){requestAnimationFrame(tick);const fk=Math.min(4,(now-lastTick)/16.7);lastTick=now;
   const dk=kTarget-kS;if(Math.abs(dk)>.0004)kS+=dk*Math.min(1,.1*fk);else kS=kTarget;applyK(kS);   // geçiş yumuşak izler
@@ -397,11 +405,15 @@ function build() {
     for (let i = 0; i < N; i++) { update(i); R.render(scene, cam); k.clearRect(0, 0, tw, th); k.drawImage(R.domElement, 0, 0, tw, th); thumbs[i].querySelector('img').src = cc.toDataURL('image/webp', .86); }
     dirty = true; return true;
   }
-  let snapped = false, thumbed = false;
+  let snapped = false, thumbed = false, prNow = 0;
+  const prBase = Math.min(devicePixelRatio || 1, coarse ? 1.5 : 2);
   function frame() {
     requestAnimationFrame(frame); if (!visible) return;
     if (!snapped) { snapped = true; snap(); }
     if (!thumbed) thumbed = makeThumbs();
+    // geçişte çerçeve büyükken sahneyi o ölçeğe göre keskin çiz (en fazla 3 kat); çerçeve yerine oturunca normale dön
+    const want = Math.min(3, prBase * Math.max(1, Math.round(sharp * 4) / 4));
+    if (want !== prNow) { prNow = want; R.setPixelRatio(want); resize(); }
     if (!dirty) return; dirty = false; update(cur); R.render(scene, cam);
   }
   new IntersectionObserver(es => { visible = es[0].isIntersecting; if (visible) { resize(); dirty = true; } }, { rootMargin: '200px' }).observe(stage);
